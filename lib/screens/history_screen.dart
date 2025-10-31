@@ -68,12 +68,12 @@ class _HistoryScreenState extends State<HistoryScreen>
   };
 
   final List<Map<String, dynamic>> boxDistribution = [
-    {'box': 1, 'count': 45, 'color': Colors.red},
-    {'box': 2, 'count': 38, 'color': Colors.orange},
-    {'box': 3, 'count': 25, 'color': Colors.yellow},
-    {'box': 4, 'count': 18, 'color': Colors.green},
-    {'box': 5, 'count': 12, 'color': Colors.blue},
-    {'box': '∞', 'count': 18, 'color': Colors.purple},
+    {'box': 1, 'count': 45, 'color': AppColors.incorrect},
+    {'box': 2, 'count': 38, 'color': AppColors.warning},
+    {'box': 3, 'count': 25, 'color': AppColors.warning.withOpacity(0.7)},
+    {'box': 4, 'count': 18, 'color': AppColors.correct},
+    {'box': 5, 'count': 12, 'color': AppColors.accent},
+    {'box': '∞', 'count': 18, 'color': AppColors.primary},
   ];
 
   @override
@@ -93,14 +93,14 @@ class _HistoryScreenState extends State<HistoryScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('学習のあしあと'),
-        backgroundColor: Colors.indigo.shade600,
+        backgroundColor: AppColors.background, // 全てベージュに統一
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: AppColors.textSecondary,
+          indicatorColor: AppColors.accent,
+          labelColor: AppColors.textPrimary,
+          unselectedLabelColor: AppColors.textPrimary.withOpacity(0.6),
           tabs: const [
             Tab(text: '今週', icon: Icon(Icons.calendar_today, size: 20)),
             Tab(text: 'BOX状況', icon: Icon(Icons.inventory, size: 20)),
@@ -143,7 +143,7 @@ class _HistoryScreenState extends State<HistoryScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -160,7 +160,7 @@ class _HistoryScreenState extends State<HistoryScreen>
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 20),
@@ -171,7 +171,7 @@ class _HistoryScreenState extends State<HistoryScreen>
                   '学習単語',
                   '${weeklyStats['totalWords']}語',
                   Icons.book,
-                  Colors.blue,
+                  AppColors.accent,
                 ),
               ),
               const SizedBox(width: 12),
@@ -180,7 +180,7 @@ class _HistoryScreenState extends State<HistoryScreen>
                   '学習時間',
                   '${(weeklyStats['totalTime'] / 60).toStringAsFixed(1)}時間',
                   Icons.timer,
-                  Colors.green,
+                  AppColors.correct,
                 ),
               ),
             ],
@@ -193,7 +193,7 @@ class _HistoryScreenState extends State<HistoryScreen>
                   '習得単語',
                   '${weeklyStats['memorizedWords']}語',
                   Icons.check_circle,
-                  Colors.orange,
+                  AppColors.warning,
                 ),
               ),
               const SizedBox(width: 12),
@@ -202,7 +202,7 @@ class _HistoryScreenState extends State<HistoryScreen>
                   '復習予定',
                   '${weeklyStats['reviewWords']}語',
                   Icons.refresh,
-                  Colors.purple,
+                  AppColors.primary,
                 ),
               ),
             ],
@@ -236,7 +236,7 @@ class _HistoryScreenState extends State<HistoryScreen>
             title,
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey.shade600,
+              color: AppColors.textPrimary.withOpacity(0.6),
             ),
           ),
         ],
@@ -248,7 +248,7 @@ class _HistoryScreenState extends State<HistoryScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -266,7 +266,7 @@ class _HistoryScreenState extends State<HistoryScreen>
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 20),
@@ -287,7 +287,7 @@ class _HistoryScreenState extends State<HistoryScreen>
                 DateFormat('E', 'ja').format(date),
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey.shade600,
+                  color: AppColors.textPrimary.withOpacity(0.6),
                 ),
               );
             }),
@@ -325,8 +325,8 @@ class _HistoryScreenState extends State<HistoryScreen>
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
                 colors: [
-                  Colors.indigo.shade400,
-                  Colors.indigo.shade200,
+                  AppColors.accent,
+                  AppColors.accent.withOpacity(0.3),
                 ],
               ),
               borderRadius: BorderRadius.circular(4),
@@ -341,7 +341,7 @@ class _HistoryScreenState extends State<HistoryScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -357,41 +357,41 @@ class _HistoryScreenState extends State<HistoryScreen>
             child: Column(
               children: [
                 const Icon(Icons.local_fire_department, 
-                    color: Colors.orange, size: 32),
+                    color: AppColors.warning, size: 32),
                 const SizedBox(height: 8),
                 Text(
                   '${weeklyStats['currentStreak']}日',
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.orange,
+                    color: AppColors.warning,
                   ),
                 ),
-                const Text(
+                Text(
                   '現在の連続学習',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontSize: 12, color: AppColors.textPrimary.withOpacity(0.3)),
                 ),
               ],
             ),
           ),
-          Container(width: 1, height: 60, color: Colors.grey.shade300),
+          Container(width: 1, height: 60, color: AppColors.textPrimary.withOpacity(0.3)),
           Expanded(
             child: Column(
               children: [
                 const Icon(Icons.emoji_events, 
-                    color: Colors.amber, size: 32),
+                    color: AppColors.warning, size: 32),
                 const SizedBox(height: 8),
                 Text(
                   '${weeklyStats['longestStreak']}日',
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.amber,
+                    color: AppColors.warning,
                   ),
                 ),
-                const Text(
+                Text(
                   '最長記録',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontSize: 12, color: AppColors.textPrimary.withOpacity(0.3)),
                 ),
               ],
             ),
@@ -420,7 +420,7 @@ class _HistoryScreenState extends State<HistoryScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -438,7 +438,7 @@ class _HistoryScreenState extends State<HistoryScreen>
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 20),
@@ -496,7 +496,7 @@ class _HistoryScreenState extends State<HistoryScreen>
                   const SizedBox(height: 8),
                   LinearProgressIndicator(
                     value: count / totalWords,
-                    backgroundColor: Colors.grey.shade200,
+                    backgroundColor: AppColors.surface.withOpacity(0.6),
                     valueColor: AlwaysStoppedAnimation<Color>(box['color']),
                     minHeight: 6,
                   ),
@@ -513,7 +513,7 @@ class _HistoryScreenState extends State<HistoryScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -531,16 +531,16 @@ class _HistoryScreenState extends State<HistoryScreen>
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
-          _buildBoxExplanationRow('BOX 1', '12時間後', Colors.red),
-          _buildBoxExplanationRow('BOX 2', '48時間後', Colors.orange),
-          _buildBoxExplanationRow('BOX 3', '96時間後', Colors.yellow.shade700),
-          _buildBoxExplanationRow('BOX 4', '168時間後', Colors.green),
-          _buildBoxExplanationRow('BOX 5', '336時間後', Colors.blue),
-          _buildBoxExplanationRow('BOX ∞', '完全定着', Colors.purple),
+          _buildBoxExplanationRow('BOX 1', '12時間後', AppColors.incorrect),
+          _buildBoxExplanationRow('BOX 2', '48時間後', AppColors.warning),
+          _buildBoxExplanationRow('BOX 3', '96時間後', AppColors.warning.withOpacity(0.7)),
+          _buildBoxExplanationRow('BOX 4', '168時間後', AppColors.correct),
+          _buildBoxExplanationRow('BOX 5', '336時間後', AppColors.accent),
+          _buildBoxExplanationRow('BOX ∞', '完全定着', AppColors.primary),
         ],
       ),
     );
@@ -583,7 +583,7 @@ class _HistoryScreenState extends State<HistoryScreen>
             interval,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey.shade600,
+              color: AppColors.textPrimary.withOpacity(0.6),
             ),
           ),
         ],
@@ -606,7 +606,7 @@ class _HistoryScreenState extends State<HistoryScreen>
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -628,13 +628,13 @@ class _HistoryScreenState extends State<HistoryScreen>
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade100,
+                  color: AppColors.correct.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -642,7 +642,7 @@ class _HistoryScreenState extends State<HistoryScreen>
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green.shade700,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -668,14 +668,14 @@ class _HistoryScreenState extends State<HistoryScreen>
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade100,
+                  color: AppColors.accent.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   stage,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
-                    color: Colors.blue.shade700,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               );
@@ -690,7 +690,7 @@ class _HistoryScreenState extends State<HistoryScreen>
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -703,14 +703,14 @@ class _HistoryScreenState extends State<HistoryScreen>
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade100,
+                  color: AppColors.warning.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   '${entry.key}: ${entry.value}語',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
-                    color: Colors.orange.shade700,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               );
@@ -725,7 +725,7 @@ class _HistoryScreenState extends State<HistoryScreen>
     return Expanded(
       child: Row(
         children: [
-          Icon(icon, size: 16, color: Colors.grey.shade600),
+          Icon(icon, size: 16, color: AppColors.textPrimary.withOpacity(0.6)),
           const SizedBox(width: 4),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -735,14 +735,14 @@ class _HistoryScreenState extends State<HistoryScreen>
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                 ),
               ),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 10,
-                  color: Colors.grey.shade600,
+                  color: AppColors.textPrimary.withOpacity(0.6),
                 ),
               ),
             ],

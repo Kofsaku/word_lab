@@ -184,7 +184,7 @@ class _ResultScreenState extends State<ResultScreen>
                   _getCharacterMessage(),
                   style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.textSecondary,
+                    color: Colors.black87,
                     height: 1.3,
                   ),
                 ),
@@ -251,7 +251,7 @@ class _ResultScreenState extends State<ResultScreen>
                     'スコア',
                     style: TextStyle(
                       fontSize: 18,
-                      color: AppColors.textSecondary,
+                      color: Colors.black87,
                     ),
                   ),
                 ],
@@ -321,7 +321,7 @@ class _ResultScreenState extends State<ResultScreen>
             '$percentage%',
             style: TextStyle(
               fontSize: 14,
-              color: AppColors.textSecondary,
+              color: Colors.black87,
             ),
           ),
         ],
@@ -415,7 +415,7 @@ class _ResultScreenState extends State<ResultScreen>
                   result['japanese'],
                   style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.textSecondary,
+                    color: Colors.black87,
                   ),
                 ),
               ],
@@ -470,7 +470,7 @@ class _ResultScreenState extends State<ResultScreen>
       color = AppColors.primary;
       text = '∞';
     } else {
-      color = isDestination ? AppColors.accent : AppColors.textSecondary;
+      color = isDestination ? AppColors.accent : Colors.black87;
       text = boxNumber.toString();
     }
     
@@ -561,7 +561,7 @@ class _ResultScreenState extends State<ResultScreen>
             label,
             style: TextStyle(
               fontSize: 16,
-              color: AppColors.textSecondary,
+              color: Colors.black87,
             ),
           ),
           Text(

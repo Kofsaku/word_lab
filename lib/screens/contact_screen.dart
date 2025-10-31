@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 class ContactScreen extends StatefulWidget {
   const ContactScreen({super.key});
@@ -73,8 +74,8 @@ class _ContactScreenState extends State<ContactScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('お問い合わせ'),
-        backgroundColor: Colors.blue.shade600,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.background,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: Container(
@@ -108,7 +109,7 @@ class _ContactScreenState extends State<ContactScreen> {
           Icon(
             Icons.mail_outline,
             size: 48,
-            color: Colors.white,
+            color: AppColors.textPrimary,
           ),
           SizedBox(height: 16),
           Text(
@@ -116,7 +117,7 @@ class _ContactScreenState extends State<ContactScreen> {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppColors.textPrimary,
             ),
           ),
           SizedBox(height: 8),
@@ -124,7 +125,7 @@ class _ContactScreenState extends State<ContactScreen> {
             'ご質問・ご要望・不具合報告など\nお気軽にお問い合わせください',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.white70,
+              color: Colors.black87,
             ),
             textAlign: TextAlign.center,
           ),
@@ -138,7 +139,7 @@ class _ContactScreenState extends State<ContactScreen> {
       margin: const EdgeInsets.all(20),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.textPrimary,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -318,25 +319,25 @@ class _ContactScreenState extends State<ContactScreen> {
       child: ElevatedButton(
         onPressed: _isLoading ? null : _submitForm,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue.shade600,
+          backgroundColor: AppColors.background,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           elevation: 2,
         ),
         child: _isLoading
-            ? const CircularProgressIndicator(color: Colors.white)
+            ? const CircularProgressIndicator(color: Colors.black)
             : const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.send, color: Colors.white),
+                  Icon(Icons.send, color: Colors.black),
                   SizedBox(width: 8),
                   Text(
                     '送信する',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ],

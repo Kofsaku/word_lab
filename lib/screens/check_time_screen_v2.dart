@@ -111,11 +111,9 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
   }
 
   void _handleAnswer() {
+    // 自信度がなければデフォルトで uncertain を設定
     if (selectedConfidence == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('自信度を選択してください')),
-      );
-      return;
+      selectedConfidence = AnswerConfidence.uncertain;
     }
 
     final question = questions[currentIndex];
@@ -251,7 +249,6 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
             children: [
               _buildHeader(),
               Expanded(child: _buildQuestionArea()),
-              _buildConfidenceButtons(),
               _buildBottomActions(),
             ],
           ),
@@ -262,7 +259,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(15),
       child: Row(
         children: [
           IconButton(
@@ -284,7 +281,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
                 '${currentIndex + 1}/${questions.length}問',
                 style: const TextStyle(
                   fontSize: 14,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],
@@ -298,10 +295,10 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
 
   Widget _buildQuestionArea() {
     return Container(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(24),
+      margin: const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -317,9 +314,9 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
             child: Column(
               children: [
                 _buildQuestionTypeIndicator(),
-                const SizedBox(height: 30),
+                const SizedBox(height: 20),
                 _buildQuestionContent(),
-                const SizedBox(height: 40),
+                const SizedBox(height: 25),
                 _buildAnswerSection(),
               ],
             ),
@@ -335,13 +332,13 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: isEngToJap ? Colors.blue.shade100 : Colors.green.shade100,
+        color: isEngToJap ? AppColors.accent.withOpacity(0.3) : AppColors.correct.withOpacity(0.3),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         isEngToJap ? '英語 → 日本語' : '日本語 → 英語',
         style: TextStyle(
-          color: isEngToJap ? Colors.blue.shade700 : Colors.green.shade700,
+          color: isEngToJap ? AppColors.accent : AppColors.correct,
           fontWeight: FontWeight.bold,
           fontSize: 14,
         ),
@@ -356,14 +353,14 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
     if (currentQuestionType == QuestionType.englishToJapanese) {
       return Column(
         children: [
-          const Icon(Icons.volume_up, color: Colors.blue, size: 32),
+          const Icon(Icons.volume_up, color: AppColors.accent, size: 32),
           const SizedBox(height: 16),
           Text(
             word.english,
             style: const TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -372,7 +369,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
             word.partOfSpeech,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey.shade600,
+              color: AppColors.textPrimary.withOpacity(0.3).withOpacity(0.6),
             ),
           ),
         ],
@@ -385,7 +382,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
             style: const TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -394,7 +391,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
             word.partOfSpeech,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey.shade600,
+              color: AppColors.textPrimary.withOpacity(0.3).withOpacity(0.6),
             ),
           ),
         ],
@@ -426,8 +423,8 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: isSelected 
-                  ? Colors.blue.shade400 
-                  : Colors.grey.shade100,
+                  ? AppColors.accent.withOpacity(0.7) 
+                  : AppColors.surface.withOpacity(0.6),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -436,7 +433,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
             child: Text(
               choices[index],
               style: TextStyle(
-                color: isSelected ? Colors.white : Colors.black87,
+                color: AppColors.textPrimary,
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
               ),
@@ -451,26 +448,32 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
     return Column(
       children: [
         _buildCardBox(),
-        const SizedBox(height: 20),
-        if (isHandwritingMode) 
-          _buildHandwritingArea()
-        else
-          _buildKeyboardInput(),
+        const SizedBox(height: 15),
+        
+        // 入力エリア（常に表示）
+        Container(
+          child: isHandwritingMode 
+              ? _buildHandwritingArea()
+              : _buildKeyboardInput(),
+        ),
         
         // 認識候補表示（手書きモード時のみ）
         if (isHandwritingMode && recognitionCandidates.isNotEmpty)
-          RecognitionCandidates(
-            candidates: recognitionCandidates,
-            selectedText: selectedCandidate,
-            onCandidateSelected: (candidate) {
-              setState(() {
-                selectedCandidate = candidate;
-                _textController.text = candidate;
-              });
-            },
+          Container(
+            margin: const EdgeInsets.only(top: 10),
+            child: RecognitionCandidates(
+              candidates: recognitionCandidates,
+              selectedText: selectedCandidate,
+              onCandidateSelected: (candidate) {
+                setState(() {
+                  selectedCandidate = candidate;
+                  _textController.text = candidate;
+                });
+              },
+            ),
           ),
         
-        const SizedBox(height: 16),
+        const SizedBox(height: 15),
         _buildInputModeToggle(),
       ],
     );
@@ -478,7 +481,9 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
 
   Widget _buildCardBox() {
     final word = questions[currentIndex]['word'] as Word;
-    final targetLength = word.english.length;
+    final question = questions[currentIndex];
+    final correctAnswer = question['correctAnswer'] as String;
+    final targetLength = correctAnswer.length;
     final currentText = _textController.text;
     
     return LayoutBuilder(
@@ -498,10 +503,10 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
               height: 50,
               margin: const EdgeInsets.symmetric(horizontal: 2),
               decoration: BoxDecoration(
-                color: hasChar ? Colors.blue.shade100 : Colors.grey.shade100,
+                color: hasChar ? AppColors.accent.withOpacity(0.3) : AppColors.surface.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: hasChar ? Colors.blue.shade300 : Colors.grey.shade300,
+                  color: hasChar ? AppColors.accent.withOpacity(0.6) : AppColors.textPrimary.withOpacity(0.3),
                   width: 2,
                 ),
               ),
@@ -511,7 +516,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue.shade700,
+                    color: AppColors.accent,
                   ),
                 ),
               ),
@@ -527,38 +532,38 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
       height: 200,
       child: HandwritingInput(
         currentQuestion: 'question_${currentIndex}', // 問題変更検知用
-        onTextChanged: (text) async {
-          setState(() {
-            _textController.text = text;
-          });
-          
-          // リアルタイム認識候補の取得
-          if (text.isNotEmpty) {
-            try {
-              final candidates = await _recognitionService.recognizeWithCandidates(
+        onTextChanged: (text) {
+          Future.microtask(() {
+            setState(() {
+              _textController.text = text;
+            });
+            
+            // リアルタイム認識候補の取得
+            if (text.isNotEmpty) {
+              _recognitionService.recognizeWithCandidates(
                 [], // 実際のストロークデータが必要
                 maxCandidates: 3,
-              );
-              setState(() {
-                recognitionCandidates = candidates;
+              ).then((candidates) {
+                if (mounted) {
+                  setState(() {
+                    recognitionCandidates = candidates;
+                  });
+                }
+              }).catchError((e) {
+                print('Recognition candidates error: $e');
               });
-            } catch (e) {
-              print('Recognition candidates error: $e');
+            } else {
+              setState(() {
+                recognitionCandidates = [];
+              });
             }
-          } else {
-            setState(() {
-              recognitionCandidates = [];
-            });
-          }
-        },
-        onClear: () {
-          setState(() {
-            _textController.clear();
           });
         },
-        onSwitchToKeyboard: () {
-          setState(() {
-            isHandwritingMode = false;
+        onClear: () {
+          Future.microtask(() {
+            setState(() {
+              _textController.clear();
+            });
           });
         },
       ),
@@ -566,20 +571,24 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
   }
 
   Widget _buildKeyboardInput() {
-    return TextField(
-      controller: _textController,
-      decoration: InputDecoration(
-        hintText: '英単語を入力してください',
-        filled: true,
-        fillColor: Colors.grey.shade50,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+    return Container(
+      height: 60,
+      child: TextField(
+        controller: _textController,
+        decoration: InputDecoration(
+          hintText: '回答を入力してください',
+          filled: true,
+          fillColor: AppColors.surface.withOpacity(0.8),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.all(16),
         ),
-        contentPadding: const EdgeInsets.all(16),
+        style: const TextStyle(fontSize: 18),
+        onChanged: (text) => setState(() {}),
+        autofocus: false,
       ),
-      style: const TextStyle(fontSize: 18),
-      onChanged: (text) => setState(() {}),
     );
   }
 
@@ -594,6 +603,10 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
             decoration: BoxDecoration(
               color: Colors.blue.shade100,
               borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.blue.shade300,
+                width: 1,
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -608,7 +621,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
                   isHandwritingMode ? 'キーボード' : '手書き',
                   style: TextStyle(
                     color: Colors.blue.shade700,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -623,6 +636,10 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
             decoration: BoxDecoration(
               color: Colors.red.shade100,
               borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.red.shade300,
+                width: 1,
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -637,7 +654,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
                   '１文字消去',
                   style: TextStyle(
                     color: Colors.red.shade700,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -650,7 +667,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
 
   Widget _buildConfidenceButtons() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Column(
         children: [
           const Text(
@@ -661,23 +678,23 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
                 child: _buildConfidenceButton(
                   confidence: AnswerConfidence.confident,
                   text: '自信をもって回答する',
-                  color: Colors.green,
+                  color: AppColors.correct,
                   icon: Icons.thumb_up,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               Expanded(
                 child: _buildConfidenceButton(
                   confidence: AnswerConfidence.uncertain,
                   text: 'あやしいけど回答する',
-                  color: Colors.yellow.shade700,
+                  color: AppColors.warning,
                   icon: Icons.help_outline,
                 ),
               ),
@@ -699,17 +716,17 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
       onPressed: showFeedback ? null : () {
         setState(() => selectedConfidence = confidence);
       },
-      icon: Icon(icon, color: isSelected ? Colors.white : color),
+      icon: Icon(icon, color: AppColors.textPrimary),
       label: Text(
         text,
         style: TextStyle(
-          color: isSelected ? Colors.white : color,
+          color: AppColors.textPrimary,
           fontWeight: FontWeight.bold,
           fontSize: 14,
         ),
       ),
       style: ElevatedButton.styleFrom(
-        backgroundColor: isSelected ? color : Colors.white,
+        backgroundColor: isSelected ? color : AppColors.surface,
         padding: const EdgeInsets.symmetric(vertical: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -720,31 +737,31 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
 
   Widget _buildBottomActions() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
         children: [
           // 降参ボタン
           Expanded(
             child: ElevatedButton.icon(
               onPressed: showFeedback ? null : _handleGiveUp,
-              icon: const Icon(Icons.flag, color: Colors.red),
-              label: const Text(
+              icon: Icon(Icons.flag, color: AppColors.incorrect),
+              label: Text(
                 '降参する',
                 style: TextStyle(
-                  color: Colors.red,
+                  color: AppColors.incorrect,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                backgroundColor: AppColors.surface,
+                padding: const EdgeInsets.symmetric(vertical: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           
           // 回答ボタン
           Expanded(
@@ -752,7 +769,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
             child: ElevatedButton(
               onPressed: _canAnswer() && !showFeedback ? _handleAnswer : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _canAnswer() ? Colors.orange : Colors.grey,
+                backgroundColor: _canAnswer() ? AppColors.warning : AppColors.surface.withOpacity(0.6),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -786,7 +803,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                feedbackColor == Colors.green ? Icons.check_circle : Icons.cancel,
+                feedbackColor == AppColors.correct ? Icons.check_circle : Icons.cancel,
                 size: 80,
                 color: AppColors.textPrimary,
               ),
@@ -799,7 +816,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
                   color: AppColors.textPrimary,
                 ),
               ),
-              if (feedbackColor == Colors.red) ...[
+              if (feedbackColor == AppColors.incorrect) ...[
                 const SizedBox(height: 12),
                 Text(
                   '正解: ${questions[currentIndex]['correctAnswer']}',

@@ -276,7 +276,7 @@ class _StageTestScreenState extends State<StageTestScreen>
                   'セット$setNumber - 問題$questionInSet',
                   style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.textSecondary,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -286,7 +286,7 @@ class _StageTestScreenState extends State<StageTestScreen>
                       : '日本語に合う英語を選んでね！',
                   style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -338,13 +338,13 @@ class _StageTestScreenState extends State<StageTestScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: isEngToJap ? AppColors.accent.withOpacity(0.3) : AppColors.correct.withOpacity(0.3),
+        color: isEngToJap ? AppColors.accent.withOpacity(0.1) : AppColors.correct.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         isEngToJap ? '英語 → 日本語' : '日本語 → 英語',
         style: TextStyle(
-          color: isEngToJap ? AppColors.accent : AppColors.correct,
+          color: AppColors.textPrimary,
           fontWeight: FontWeight.bold,
           fontSize: 14,
         ),
@@ -465,7 +465,7 @@ class _StageTestScreenState extends State<StageTestScreen>
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.surface,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),

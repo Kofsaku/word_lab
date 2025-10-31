@@ -160,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Text(
                 'ぼうけんの進み具合(すすみぐあい)',
                 style: TextStyle(
-                  color: AppColors.textSecondary,
+                  color: AppColors.textPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -181,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Text(
                 '%',
                 style: TextStyle(
-                  color: AppColors.textSecondary,
+                  color: AppColors.textPrimary,
                   fontSize: 28,
                   fontWeight: FontWeight.w500,
                 ),
@@ -202,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     'ぜんぶで $total ステージ',
                     style: const TextStyle(
                       fontSize: 14,
-                      color: AppColors.textSecondary,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ],
@@ -265,7 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -282,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icons.play_circle_fill,
             title: 'トレーニングの続き',
             subtitle: '前回の続きから学習を開始',
-            color: Colors.blue,
+            color: AppColors.accent,
             onTap: () => Navigator.pushNamed(context, '/stage-select'),
             isMain: true,
           ),
@@ -293,7 +293,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icons.tune,
             title: '学習レベルの選択',
             subtitle: '単語・文法レベルを設定',
-            color: Colors.green,
+            color: AppColors.correct,
             onTap: () => Navigator.pushNamed(context, '/level-select'),
           ),
           const SizedBox(height: 16),
@@ -303,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icons.analytics,
             title: '学習のあしあと',
             subtitle: '学習履歴と進捗を確認',
-            color: Colors.orange,
+            color: AppColors.warning,
             onTap: () => Navigator.pushNamed(context, '/history'),
           ),
           const SizedBox(height: 16),
@@ -313,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icons.help_outline,
             title: 'ヘルプ',
             subtitle: '使い方とよくある質問',
-            color: Colors.purple,
+            color: AppColors.primary,
             onTap: () => Navigator.pushNamed(context, '/help'),
           ),
         ],
@@ -366,7 +366,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextStyle(
                       fontSize: isMain ? 18 : 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -374,7 +374,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     subtitle,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey.shade600,
+                      color: AppColors.textPrimary.withOpacity(0.6),
                     ),
                   ),
                 ],
@@ -401,7 +401,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
@@ -413,7 +413,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             child: Icon(
               Icons.settings,
-              color: Colors.grey.shade700,
+              color: AppColors.textPrimary.withOpacity(0.7),
               size: 24,
             ),
           ),
@@ -559,7 +559,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     subtitle,
                     style: TextStyle(
                       fontSize: 14,
-                      color: AppColors.textSecondary,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ],

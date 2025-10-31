@@ -255,7 +255,7 @@ class _InputTrainingScreenState extends State<InputTrainingScreen> {
   Widget _buildWordCard(Word word) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.black,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
@@ -423,12 +423,12 @@ class _InputTrainingScreenState extends State<InputTrainingScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white, size: 24),
+          Icon(icon, color: Colors.black, size: 24),
           const SizedBox(height: 5),
           Text(
             label,
             style: const TextStyle(
-              color: Colors.white,
+              color: Colors.black,
               fontSize: 12,
               fontWeight: FontWeight.bold,
             ),

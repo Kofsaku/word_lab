@@ -65,7 +65,7 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('${word.english} を習得済みにしました'),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.background,
       ),
     );
   }
@@ -75,7 +75,7 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('復習リスト'),
-        backgroundColor: Colors.orange.shade600,
+        backgroundColor: AppColors.background,
         elevation: 0,
         actions: [
           IconButton(
@@ -125,7 +125,7 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
               const Text(
                 '要復習の単語',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.black87,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -134,7 +134,7 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
               Text(
                 '${reviewWords.length} 単語',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.black87,
                   fontSize: 16,
                 ),
               ),
@@ -143,12 +143,12 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
           Container(
             padding: const EdgeInsets.all(15),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.black87,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.repeat,
-              color: Colors.white,
+              color: Colors.black87,
               size: 30,
             ),
           ),
@@ -250,7 +250,7 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
           child: Container(
             margin: const EdgeInsets.only(bottom: 15),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.black87,
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
@@ -278,7 +278,7 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
                   child: Text(
                     word.english[0].toUpperCase(),
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Colors.black87,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -368,7 +368,7 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Icon(
             icon,
-            color: Colors.white,
+            color: Colors.black87,
             size: 30,
           ),
         ),

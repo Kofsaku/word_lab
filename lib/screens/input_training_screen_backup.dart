@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart' as painting;
 import 'package:rive/rive.dart' hide LinearGradient, Image;
@@ -22,6 +23,7 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
   List<Word> words = [];
   List<Word> memorizedWords = [];
   List<Word> reviewWords = [];
+  List<Map<String, dynamic>> stackedCards = []; // {word: Word, type: 'confident'/'review'}
   int currentIndex = 0;
   final AudioService _audioService = AudioService.instance;
   
@@ -35,6 +37,8 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
   late Animation<Offset> _stackAnimation;
   late Animation<double> _characterFloatAnimation;
   late Animation<double> _characterScaleAnimation;
+  AnimationController? _cardPopInController;
+  Animation<double>? _cardPopInAnimation;
   bool _isSwipeDetected = false;
   String _swipeDirection = '';
   bool _isUserSwiping = false;
@@ -42,12 +46,11 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
   double _dragRotation = 0.0;
   
   // Ghost trail effects
-  List<double> _trailOpacities = [0.0, 0.0, 0.0];
+  List<Widget> _trailWidgets = [];
+  List<double> _trailOpacities = [0.4, 0.25, 0.15];
   List<Offset> _trailOffsets = [Offset.zero, Offset.zero, Offset.zero];
   static const double _swipeThreshold = 96.0;
-  
-  // Stacked cards with types  
-  List<Map<String, dynamic>> stackedCards = [];
+  bool _isAutoSliding = false;
   
   // アニメーション画像シーケンス
   final List<String> _animationFrames = [
@@ -76,12 +79,12 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
 
   void _initializeAnimations() {
     _cardAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 380),
       vsync: this,
     );
     
     _stackAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 260),
       vsync: this,
     );
 
@@ -89,13 +92,18 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
       duration: const Duration(seconds: 3),
       vsync: this,
     )..repeat();
+    
+    _cardPopInController = AnimationController(
+      duration: const Duration(milliseconds: 320),
+      vsync: this,
+    );
 
     _cardAnimation = Tween<double>(
       begin: 1.0,
       end: 0.0,
     ).animate(CurvedAnimation(
       parent: _cardAnimationController,
-      curve: Curves.easeInOut,
+      curve: Curves.easeOut,
     ));
 
     _stackAnimation = Tween<Offset>(
@@ -104,6 +112,14 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
     ).animate(CurvedAnimation(
       parent: _stackAnimationController,
       curve: Curves.elasticOut,
+    ));
+    
+    _cardPopInAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _cardPopInController!,
+      curve: const Cubic(0.22, 1.2, 0.36, 1), // HTML's cubic-bezier
     ));
 
     _characterFloatAnimation = Tween<double>(
@@ -152,6 +168,12 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
       }
       
       if (words.isNotEmpty) {
+        // Trigger initial pop-in animation
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted) {
+            _cardPopInController?.forward();
+          }
+        });
         _playCurrentWordAudio();
       }
     } catch (e) {
@@ -161,6 +183,12 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
       });
       
       if (words.isNotEmpty) {
+        // Trigger initial pop-in animation
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted) {
+            _cardPopInController?.forward();
+          }
+        });
         _playCurrentWordAudio();
       }
     }
@@ -188,11 +216,13 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
     setState(() {
       _isSwipeDetected = true;
       _swipeDirection = direction;
+      _isAutoSliding = true;
     });
 
     final word = words[currentIndex];
     
-    _cardAnimationController.forward().then((_) {
+    // Auto-slide animation with ghost trails
+    _performAutoSlideAnimation(direction).then((_) {
       if (direction == 'right') {
         // 「知ってる」- カード積み上げ
         memorizedWords.add(word);
@@ -209,27 +239,49 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
       _moveToNextWord();
     });
   }
+  
+  Future<void> _performAutoSlideAnimation(String direction) async {
+    final directionSign = direction == 'right' ? 1 : -1;
+    final speedX = 600.0 * directionSign; // HTML: 600 * direction
+    
+    // Staggered trail animation exactly like HTML
+    for (int i = 0; i < _trailOpacities.length; i++) {
+      Future.delayed(Duration(milliseconds: i * 40), () { // HTML: delay = i * 40
+        if (mounted) {
+          setState(() {
+            _trailOffsets[i] = Offset(speedX, 0); // Pure horizontal
+            _trailOpacities[i] = 0.0;
+          });
+        }
+      });
+    }
+    
+    // Main card slide with HTML timing and easing
+    return _cardAnimationController.forward();
+  }
 
   void _moveToNextWord() {
-    Future.delayed(const Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 420), () {
       if (mounted) {
         setState(() {
           currentIndex++;
           _isSwipeDetected = false;
           _swipeDirection = '';
           _isUserSwiping = false;
+          _isAutoSliding = false;
           _dragOffset = 0.0;
           _dragRotation = 0.0;
-          // Reset trails
-          for (int i = 0; i < _trailOpacities.length; i++) {
-            _trailOffsets[i] = Offset.zero;
-            _trailOpacities[i] = 0.0;
-          }
+          // Reset trail effects
+          _trailOffsets = [Offset.zero, Offset.zero, Offset.zero];
+          _trailOpacities = [0.4, 0.25, 0.15];
         });
         
         _cardAnimationController.reset();
         
         if (currentIndex < words.length) {
+          // Trigger pop-in animation for new card
+          _cardPopInController?.reset();
+          _cardPopInController?.forward();
           _playCurrentWordAudio();
         } else {
           _checkCompletion();
@@ -259,8 +311,14 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
           '復習する単語：${reviewWords.length}語\n\n'
           'チェックタイムに進みますか？',
         ),
-        actionsAlignment: MainAxisAlignment.center,
         actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _restartWithReviewWords();
+            },
+            child: const Text('復習する'),
+          ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
@@ -275,26 +333,13 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
 
   void _restartWithReviewWords() {
     setState(() {
-      // Include all words that need review (from stackedCards)
-      final reviewOnlyWords = stackedCards
-          .where((card) => card['type'] == 'review')
-          .map((card) => card['word'] as Word)
-          .toList();
-      
-      words = reviewOnlyWords.isNotEmpty ? reviewOnlyWords : List.from(reviewWords);
+      words = List.from(reviewWords);
       reviewWords.clear();
-      stackedCards.clear(); // Reset for new round
-      memorizedWords.clear(); // Reset memorized words
       currentIndex = 0;
       _showMeaning = false;
       _isUserSwiping = false;
       _dragOffset = 0.0;
       _dragRotation = 0.0;
-      // Reset trails
-      for (int i = 0; i < _trailOpacities.length; i++) {
-        _trailOffsets[i] = Offset.zero;
-        _trailOpacities[i] = 0.0;
-      }
     });
     _playCurrentWordAudio();
   }
@@ -321,6 +366,7 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
     _cardAnimationController.dispose();
     _stackAnimationController.dispose();
     _characterAnimationController.dispose();
+    _cardPopInController?.dispose();
     _meaningTimer?.cancel();
     _frameTimer?.cancel();
     _animationTimer?.cancel();
@@ -489,65 +535,59 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
     );
   }
 
-  Widget _buildCardStack() {
-    return SizedBox(
+  Widget _buildCardStack() {\n    return Container(\n      width: 120,\n      height: 200,\n      child: Column(\n        children: [\n          Expanded(\n            child: ListView.builder(\n              reverse: true,\n              itemCount: stackedCards.length,\n              itemBuilder: (context, index) {\n                final cardData = stackedCards[index];\n                final isLatest = index == stackedCards.length - 1;\n                \n                return Container(\n                  margin: const EdgeInsets.only(bottom: 4),\n                  child: AnimatedBuilder(\n                    animation: _stackAnimationController,\n                    builder: (context, child) {\n                      if (isLatest && _stackAnimationController.isAnimating) {\n                        final t = _stackAnimationController.value;\n                        \n                        double scale, translateY, opacity;\n                        if (t <= 0.7) {\n                          final phase1 = t / 0.7;\n                          opacity = phase1;\n                          translateY = 30 * (1 - phase1) + (-6 * phase1);\n                          scale = 0.92 + (1.02 - 0.92) * phase1;\n                        } else {\n                          final phase2 = (t - 0.7) / 0.3;\n                          opacity = 1.0;\n                          translateY = -6 * (1 - phase2);\n                          scale = 1.02 - 0.02 * phase2;\n                        }\n                        \n                        return Opacity(\n                          opacity: opacity,\n                          child: Transform.translate(\n                            offset: Offset(0, translateY),\n                            child: Transform.scale(\n                              scale: scale,\n                              child: _buildStackCard(cardData),\n                            ),\n                          ),\n                        );\n                      }\n                      \n                      return _buildStackCard(cardData);\n                    },\n                  ),\n                );\n              },\n            ),\n          ),\n        ],\n      ),\n    );\n  }\n  \n  Widget _buildStackCard(Map<String, dynamic> cardData) {\n    final word = cardData['word'] as Word;\n    final type = cardData['type'] as String;\n    \n    // Color coding: confident = blue, review = red\n    final cardColor = type == 'confident' \n        ? const Color(0xFF60A5FA) // Blue\n        : const Color(0xFFF87171); // Red\n    \n    return Container(\n      width: 88,\n      height: 44,\n      decoration: BoxDecoration(\n        color: Colors.black,\n        borderRadius: BorderRadius.circular(10),\n        border: Border.all(\n          color: cardColor,\n          width: 2,\n        ),\n        boxShadow: [\n          BoxShadow(\n            color: Colors.black.withOpacity(0.25),\n            blurRadius: 20,\n            offset: const Offset(0, 8),\n          ),\n        ],\n      ),\n      child: Center(\n        child: Text(\n          word.english,\n          style: TextStyle(\n            fontSize: 12,\n            fontWeight: FontWeight.w700,\n            color: cardColor,\n          ),\n          textAlign: TextAlign.center,\n          overflow: TextOverflow.ellipsis,\n        ),\n      ),\n    );\n  }\n\n  Widget _buildCardStack() {
+    return Container(
       width: 120,
-      height: 220, // Height for 6 non-overlapping cards (6 * 32 + 28 = 220)
+      height: 140,
       child: Stack(
         children: List.generate(
-          6, // Show all 6 possible card positions
+          6, // Show all 6 possible cards
           (index) {
-            final hasCard = index < stackedCards.length;
-            final cardData = hasCard ? stackedCards[index] : null;
-            final isLatest = hasCard && index == stackedCards.length - 1;
+            final isActive = index < memorizedWords.length;
+            final isLatest = index == memorizedWords.length - 1 && isActive;
+            
+            // HTML-style brick offset: alternate positioning
+            final rightOffset = (index % 2 == 0) ? 0.0 : 12.0;
             
             return Positioned(
-              bottom: index * 32.0, // No overlap - full card height + gap
-              right: 0,
+              bottom: index * 8.0 + (index > 0 ? 8.0 : 0.0), // 8px gap + 8px margin
+              right: rightOffset,
               child: AnimatedBuilder(
                 animation: _stackAnimationController,
                 builder: (context, child) {
-                  if (hasCard) {
-                    final word = cardData!['word'] as Word;
-                    final type = cardData['type'] as String;
-                    final cardColor = type == 'confident' 
-                        ? const Color(0xFF60A5FA) // Blue
-                        : const Color(0xFFF87171); // Red
+                  // Pop-stack animation for latest card (HTML cubic-bezier)
+                  if (isLatest) {
+                    final t = _stackAnimationController.value;
+                    final cubicValue = _cubicBezier(0.2, 0.9, 0.22, 1.2, t);
                     
-                    // Pop-stack animation for latest card
-                    if (isLatest && _stackAnimationController.isAnimating) {
-                      final t = _stackAnimationController.value;
-                      
-                      double scale, translateY, opacity;
-                      if (t <= 0.7) {
-                        final phase1 = t / 0.7;
-                        opacity = phase1;
-                        translateY = 30 * (1 - phase1) + (-6 * phase1);
-                        scale = 0.92 + (1.02 - 0.92) * phase1;
-                      } else {
-                        final phase2 = (t - 0.7) / 0.3;
-                        opacity = 1.0;
-                        translateY = -6 * (1 - phase2);
-                        scale = 1.02 - 0.02 * phase2;
-                      }
-                      
-                      return Opacity(
-                        opacity: opacity,
-                        child: Transform.translate(
-                          offset: Offset(0, translateY),
-                          child: Transform.scale(
-                            scale: scale,
-                            child: _buildStackCard(word, cardColor),
-                          ),
-                        ),
-                      );
+                    double scale, translateY, opacity;
+                    if (t <= 0.7) {
+                      // 0-70%: opacity 0->1, translateY 30px->-6px, scale 0.92->1.02
+                      final phase1 = t / 0.7;
+                      opacity = phase1;
+                      translateY = 30 * (1 - phase1) + (-6 * phase1);
+                      scale = 0.92 + (1.02 - 0.92) * phase1;
+                    } else {
+                      // 70-100%: opacity 1, translateY -6px->0, scale 1.02->1
+                      final phase2 = (t - 0.7) / 0.3;
+                      opacity = 1.0;
+                      translateY = -6 * (1 - phase2);
+                      scale = 1.02 - 0.02 * phase2;
                     }
                     
-                    return _buildStackCard(word, cardColor);
-                  } else {
-                    // Empty placeholder
-                    return _buildStackCard(null, Colors.black87);
+                    return Opacity(
+                      opacity: opacity,
+                      child: Transform.translate(
+                        offset: Offset(0, translateY),
+                        child: Transform.scale(
+                          scale: scale,
+                          child: _buildStackCard(index, isActive, memorizedWords.length > index ? memorizedWords[index].english : ''),
+                        ),
+                      ),
+                    );
                   }
+                  
+                  return _buildStackCard(index, isActive, memorizedWords.length > index ? memorizedWords[index].english : '');
                 },
               ),
             );
@@ -557,32 +597,36 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
     );
   }
   
-  Widget _buildStackCard(Word? word, Color cardColor) {
+  // HTML cubic-bezier approximation
+  double _cubicBezier(double x1, double y1, double x2, double y2, double t) {
+    return (1 - t) * (1 - t) * (1 - t) * 0 + 
+           3 * (1 - t) * (1 - t) * t * y1 + 
+           3 * (1 - t) * t * t * y2 + 
+           t * t * t * 1;
+  }
+  
+  Widget _buildStackCard(int index, bool isActive, String word) {
     return Container(
-      width: 70, // Smaller size to fit all 6 cards
-      height: 28,  // Smaller height
+      width: 88, // clamp(120px, 88%, 210px) - taking middle value
+      height: 44,
       decoration: BoxDecoration(
-        color: word != null ? Colors.white : Colors.transparent, // 背景色は白のまま
-        borderRadius: BorderRadius.circular(8),
-        border: word != null ? Border.all(
-          color: cardColor,
-          width: 2,
-        ) : null,
-        boxShadow: word != null ? [
+        color: isActive ? const Color(0xFFE5E7EB) : Colors.transparent, // HTML #e5e7eb
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: isActive ? [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ] : [],
       ),
-      child: word != null ? Center(
+      child: isActive ? Center(
         child: Text(
-          word.english,
-          style: TextStyle(
-            fontSize: 10,
+          word,
+          style: const TextStyle(
+            fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: cardColor,
+            color: Color(0xFF0F172A), // HTML color
           ),
           textAlign: TextAlign.center,
           overflow: TextOverflow.ellipsis,
@@ -665,7 +709,7 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
           'カードを左右にスワイプしてください',
           style: TextStyle(
             fontSize: 12,
-            color: Colors.black87,
+            color: Colors.black87.withOpacity(0.7),
           ),
         ),
       ],
@@ -680,10 +724,11 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Ghost trails (behind main card) - HTML style
+          // Ghost trails (behind main card)
           ...List.generate(3, (index) => 
-            Opacity(
-              opacity: _trailOpacities[index],
+            AnimatedOpacity(
+              opacity: _trailOpacities[index].clamp(0.0, 1.0),
+              duration: const Duration(milliseconds: 100),
               child: Transform.translate(
                 offset: _trailOffsets[index],
                 child: Container(
@@ -691,13 +736,17 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
                   height: 180,
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
-                    color: Colors.white, // HTML var(--card)
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.textPrimary.withOpacity(0.3),
+                      width: 2,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.18), // HTML shadow
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
+                        color: AppColors.textPrimary.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
@@ -706,114 +755,154 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
             ),
           ),
           
-          // Main card
-          Transform.translate(
-            offset: Offset(_dragOffset, 0),
-            child: Container(
-            width: 300,
-            height: 180,
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            decoration: BoxDecoration(
-              color: _getCardColor(),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: _getBorderColor(),
-                width: 3,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.textPrimary.withOpacity(0.15),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // スワイプ方向インジケーター
-                if (_isUserSwiping) ...[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // 左スワイプインジケーター
-                      Container(
-                        margin: const EdgeInsets.only(left: 20),
-                        padding: const EdgeInsets.all(8),
+          // Main card with pop-in animation
+          AnimatedBuilder(
+            animation: _cardPopInController != null 
+                ? Listenable.merge([_cardAnimation, _cardPopInController!])
+                : _cardAnimation,
+            builder: (context, child) {
+              // Pop-in effect for new cards - safe access with fallback
+              final popInValue = _cardPopInController?.isCompleted == true || _cardPopInController?.isAnimating == true 
+                  ? _cardPopInAnimation?.value ?? 1.0
+                  : 1.0;
+              final popInScale = 0.92 + (popInValue * 0.08);
+              final popInOffset = 18 * (1 - popInValue);
+              final popInRotation = -0.035 * (1 - popInValue); // -2 degrees
+              
+              return Transform.scale(
+                scale: _isAutoSliding 
+                    ? 1.0 // No scale during slide
+                    : popInScale,
+                child: Transform.translate(
+                  offset: _isAutoSliding 
+                      ? Offset(
+                          (_swipeDirection == 'right' ? 600 : -600),
+                          0 // Pure horizontal slide
+                        )
+                      : Offset(_dragOffset, popInOffset),
+                  child: Transform.rotate(
+                    angle: _isAutoSliding 
+                        ? 0.0 // No rotation during slide
+                        : popInRotation, // Only pop-in rotation
+                    child: AnimatedOpacity(
+                      opacity: (_isAutoSliding 
+                          ? 0.0 // Fade out during slide
+                          : popInValue).clamp(0.0, 1.0),
+                      duration: Duration(milliseconds: _isAutoSliding ? 380 : 320), // HTML slide duration
+                      child: Container(
+                        width: 300,
+                        height: 180,
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
                         decoration: BoxDecoration(
-                          color: _dragOffset < -20 
-                              ? AppColors.incorrect 
-                              : AppColors.incorrect.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.refresh, 
-                              color: AppColors.surface,
-                              size: 16,
+                          color: _getCardColor(),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: _getBorderColor(),
+                            width: 3,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.textPrimary.withOpacity(0.15),
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '念入り',
-                              style: TextStyle(
-                                color: AppColors.surface,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // スワイプ方向インジケーター
+                            if (_isUserSwiping) ...[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  // 左スワイプインジケーター
+                                  AnimatedOpacity(
+                                    opacity: _dragOffset < -20 ? 1.0 : 0.3,
+                                    duration: const Duration(milliseconds: 100),
+                                    child: Container(
+                                      margin: const EdgeInsets.only(left: 20),
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.incorrect,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.refresh, 
+                                            color: AppColors.surface,
+                                            size: 16,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '念入り',
+                                            style: TextStyle(
+                                              color: AppColors.surface,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  // 右スワイプインジケーター
+                                  AnimatedOpacity(
+                                    opacity: _dragOffset > 20 ? 1.0 : 0.3,
+                                    duration: const Duration(milliseconds: 100),
+                                    child: Container(
+                                      margin: const EdgeInsets.only(right: 20),
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.correct,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            '知ってる',
+                                            style: TextStyle(
+                                              color: AppColors.surface,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Icon(
+                                            Icons.check, 
+                                            color: AppColors.surface,
+                                            size: 16,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
+                              const SizedBox(height: 16),
+                            ],
+                            // 英単語
+                            Text(
+                              words[currentIndex].english,
+                              style: const TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
                           ],
                         ),
                       ),
-                      // 右スワイプインジケーター
-                      Container(
-                        margin: const EdgeInsets.only(right: 20),
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: _dragOffset > 20 
-                              ? AppColors.correct 
-                              : AppColors.correct.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '知ってる',
-                              style: TextStyle(
-                                color: AppColors.surface,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.check, 
-                              color: AppColors.surface,
-                              size: 16,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                ],
-                // 英単語
-                Text(
-                  words[currentIndex].english,
-                  style: const TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                  textAlign: TextAlign.center,
                 ),
-              ],
-            ),
+              );
+            },
           ),
-          ), // Transform.translate close
         ],
       ),
     );
@@ -1166,29 +1255,36 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
   }
 
   void _handlePanUpdate(DragUpdateDetails details) {
-    if (_isSwipeDetected) return;
+    if (_isSwipeDetected || _isAutoSliding) return;
 
     setState(() {
+      // Horizontal-only movement (no rotation)
       final dx = details.localPosition.dx - 150; // Card center
-      final dy = details.localPosition.dy - 90; // Card vertical center
       
       _dragOffset = dx;
-      _dragRotation = 0.0; // No rotation - horizontal only
+      _dragRotation = 0.0; // No rotation for clean horizontal movement
       
-      // Update ghost trails exactly like HTML
+      // Update ghost trails - only show when moving
       final th = _swipeThreshold;
       final amt = (_dragOffset.abs() / th).clamp(0.0, 1.0);
       
       for (int i = 0; i < _trailOpacities.length; i++) {
         final lag = (i + 1) * 0.18; // 18% of movement per layer
-        _trailOffsets[i] = Offset(_dragOffset * (1 - lag), dy * (1 - lag));
-        _trailOpacities[i] = ((0.18 + amt * 0.4) * (1 - i * 0.28)).clamp(0.0, 1.0);
+        
+        if (_dragOffset.abs() > 5) { // Only show trails when actively dragging
+          _trailOffsets[i] = Offset(_dragOffset * (1 - lag), 0); // Pure horizontal
+          _trailOpacities[i] = ((0.18 + amt * 0.4) * (1 - i * 0.28)).clamp(0.0, 1.0);
+        } else {
+          // When stationary, trails perfectly overlap with main card
+          _trailOffsets[i] = Offset.zero;
+          _trailOpacities[i] = 0.0; // Hide when not moving
+        }
       }
     });
   }
 
   void _handlePanEnd(DragEndDetails details) {
-    if (_isSwipeDetected) return;
+    if (_isSwipeDetected || _isAutoSliding) return;
 
     final th = _swipeThreshold;
     final shouldSlide = _dragOffset.abs() > th;
@@ -1201,15 +1297,49 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
         _handleSwipe('left');
       }
     } else {
-      // Return to center like HTML
+      // Return to center exactly like HTML
       setState(() {
         _isUserSwiping = false;
-        _dragOffset = 0.0;
-        _dragRotation = 0.0;
-        // Reset trails
-        for (int i = 0; i < _trailOpacities.length; i++) {
-          _trailOffsets[i] = Offset.zero;
-          _trailOpacities[i] = 0.0;
+      });
+      
+      // Animate back to center with HTML easing
+      final controller = AnimationController(
+        duration: const Duration(milliseconds: 220),
+        vsync: this,
+      );
+      
+      final animation = Tween<double>(begin: 1.0, end: 0.0)
+          .animate(CurvedAnimation(
+            parent: controller,
+            curve: const Cubic(0.2, 0.9, 0.2, 1), // HTML cubic-bezier
+          ));
+      
+      animation.addListener(() {
+        if (mounted) {
+          setState(() {
+            _dragOffset = _dragOffset * animation.value;
+            _dragRotation = _dragRotation * animation.value;
+            
+            // Fade out trails
+            for (int i = 0; i < _trailOpacities.length; i++) {
+              _trailOffsets[i] = Offset(_trailOffsets[i].dx * animation.value, _trailOffsets[i].dy * animation.value);
+              _trailOpacities[i] = (_trailOpacities[i] * animation.value).clamp(0.0, 1.0);
+            }
+          });
+        }
+      });
+      
+      controller.forward().then((_) {
+        controller.dispose();
+        if (mounted) {
+          setState(() {
+            _dragOffset = 0.0;
+            _dragRotation = 0.0;
+            for (int i = 0; i < _trailOpacities.length; i++) {
+              _trailOffsets[i] = Offset.zero;
+              _trailOpacities[i] = 0.0;
+            }
+          });
         }
       });
     }

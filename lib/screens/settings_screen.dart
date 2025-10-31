@@ -21,7 +21,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('設定'),
-        backgroundColor: AppColors.textSecondary,
+        backgroundColor: AppColors.background,
         elevation: 0,
       ),
       body: Container(
@@ -36,7 +36,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: const Text(
                 'アプリの設定を変更できます',
                 style: TextStyle(
-                  color: AppColors.surface,
+                  color: AppColors.textPrimary,
                   fontSize: 16,
                 ),
               ),
@@ -103,7 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   'ライセンス',
                   'オープンソースライセンス',
                   Icons.description,
-                  AppColors.textSecondary,
+                  Colors.black87,
                   () => _showLicensePage(context),
                 ),
               ],
@@ -165,7 +165,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         child: Icon(
           icon,
-          color: value ? AppColors.primary : AppColors.textSecondary,
+          color: value ? AppColors.primary : Colors.black87,
         ),
       ),
       title: Text(title),
@@ -173,7 +173,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         subtitle,
         style: TextStyle(
           fontSize: 12,
-          color: AppColors.textSecondary,
+          color: Colors.black87,
         ),
       ),
       trailing: Switch(
@@ -292,14 +292,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 'A',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: Colors.black87,
                 ),
               ),
               Text(
                 'A',
                 style: TextStyle(
                   fontSize: 20,
-                  color: AppColors.textSecondary,
+                  color: Colors.black87,
                 ),
               ),
             ],
@@ -334,7 +334,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         subtitle,
         style: TextStyle(
           fontSize: 12,
-          color: AppColors.textSecondary,
+          color: Colors.black87,
         ),
       ),
       trailing: Icon(
@@ -351,7 +351,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       trailing: Text(
         value,
         style: TextStyle(
-          color: AppColors.textSecondary,
+          color: Colors.black87,
         ),
       ),
     );
@@ -432,7 +432,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               'sample@example.com',
               style: TextStyle(
                 fontSize: 12,
-                color: AppColors.textSecondary,
+                color: Colors.black87,
               ),
             ),
           );

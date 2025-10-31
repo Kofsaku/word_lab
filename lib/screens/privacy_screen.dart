@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 class PrivacyScreen extends StatelessWidget {
   const PrivacyScreen({super.key});
@@ -8,8 +9,8 @@ class PrivacyScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('プライバシーポリシー'),
-        backgroundColor: Colors.green.shade700,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.background,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: Container(
@@ -46,7 +47,7 @@ class PrivacyScreen extends StatelessWidget {
           Icon(
             Icons.privacy_tip,
             size: 48,
-            color: Colors.white,
+            color: AppColors.textPrimary,
           ),
           SizedBox(height: 16),
           Text(
@@ -54,7 +55,7 @@ class PrivacyScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppColors.textPrimary,
             ),
           ),
           SizedBox(height: 8),
@@ -62,7 +63,7 @@ class PrivacyScreen extends StatelessWidget {
             '最終更新日：2024年10月6日',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white70,
+              color: Colors.black87,
             ),
           ),
         ],
@@ -74,7 +75,7 @@ class PrivacyScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.textPrimary,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(

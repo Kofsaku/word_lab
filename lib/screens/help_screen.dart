@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 class HelpScreen extends StatefulWidget {
   const HelpScreen({super.key});
@@ -110,28 +111,23 @@ class _HelpScreenState extends State<HelpScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('ヘルプ'),
-        backgroundColor: Colors.purple.shade600,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.background,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.purple.shade600,
-              Colors.purple.shade50,
+      body: SafeArea(
+        child: Container(
+          decoration: const BoxDecoration(
+            color: AppColors.background,
+          ),
+          child: Column(
+            children: [
+              _buildHeader(),
+              _buildCategoryFilter(),
+              Expanded(child: _buildFAQList()),
+              _buildContactButton(),
             ],
           ),
-        ),
-        child: Column(
-          children: [
-            _buildHeader(),
-            _buildCategoryFilter(),
-            Expanded(child: _buildFAQList()),
-            _buildContactButton(),
-          ],
         ),
       ),
     );
@@ -139,29 +135,29 @@ class _HelpScreenState extends State<HelpScreen> {
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
       child: const Column(
         children: [
           Icon(
             Icons.help_outline,
-            size: 48,
-            color: Colors.white,
+            size: 42,
+            color: AppColors.textPrimary,
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 12),
           Text(
             'よくある質問',
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppColors.textPrimary,
             ),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 6),
           Text(
             '分からないことがあれば、まずはこちらをご確認ください',
             style: TextStyle(
-              fontSize: 16,
-              color: Colors.white70,
+              fontSize: 14,
+              color: AppColors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -172,7 +168,7 @@ class _HelpScreenState extends State<HelpScreen> {
 
   Widget _buildCategoryFilter() {
     return Container(
-      height: 50,
+      height: 45,
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -184,13 +180,13 @@ class _HelpScreenState extends State<HelpScreen> {
           return GestureDetector(
             onTap: () => setState(() => _selectedCategory = category),
             child: Container(
-              margin: const EdgeInsets.only(right: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              margin: const EdgeInsets.only(right: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
                 color: isSelected ? Colors.white : Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: isSelected ? Colors.purple : Colors.white,
+                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
                   width: 1,
                 ),
               ),
@@ -198,9 +194,9 @@ class _HelpScreenState extends State<HelpScreen> {
                 child: Text(
                   category,
                   style: TextStyle(
-                    color: isSelected ? Colors.purple : Colors.white,
+                    color: isSelected ? AppColors.primary : AppColors.textPrimary,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    fontSize: 14,
+                    fontSize: 13,
                   ),
                 ),
               ),
@@ -213,8 +209,9 @@ class _HelpScreenState extends State<HelpScreen> {
 
   Widget _buildFAQList() {
     return Container(
-      margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: ListView.builder(
+        padding: EdgeInsets.zero,
         itemCount: _filteredItems.length,
         itemBuilder: (context, index) {
           return _buildFAQItem(_filteredItems[index]);
@@ -225,56 +222,56 @@ class _HelpScreenState extends State<HelpScreen> {
 
   Widget _buildFAQItem(FAQItem item) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
+            blurRadius: 6,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       child: ExpansionTile(
         leading: Container(
-          width: 40,
-          height: 40,
+          width: 36,
+          height: 36,
           decoration: BoxDecoration(
-            color: Colors.purple.withOpacity(0.1),
+            color: AppColors.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Icon(
             Icons.help_outline,
-            color: Colors.purple,
-            size: 20,
+            color: AppColors.primary,
+            size: 18,
           ),
         ),
         title: Text(
           item.question,
           style: const TextStyle(
             fontWeight: FontWeight.w600,
-            fontSize: 16,
+            fontSize: 15,
           ),
         ),
         subtitle: Text(
           item.category,
           style: TextStyle(
             color: Colors.grey.shade600,
-            fontSize: 12,
+            fontSize: 11,
           ),
         ),
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
             child: Text(
               item.answer,
               style: TextStyle(
                 color: Colors.grey.shade700,
-                fontSize: 14,
-                height: 1.5,
+                fontSize: 13,
+                height: 1.4,
               ),
             ),
           ),
@@ -285,33 +282,34 @@ class _HelpScreenState extends State<HelpScreen> {
 
   Widget _buildContactButton() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
       child: Column(
         children: [
           const Text(
             '解決しない問題がありますか？',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 15,
               fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           SizedBox(
             width: double.infinity,
-            height: 50,
+            height: 46,
             child: ElevatedButton.icon(
               onPressed: () => Navigator.pushNamed(context, '/contact'),
-              icon: const Icon(Icons.mail_outline),
+              icon: const Icon(Icons.mail_outline, size: 20),
               label: const Text(
                 'お問い合わせ',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.textOnPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

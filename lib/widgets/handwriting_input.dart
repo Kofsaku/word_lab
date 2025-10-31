@@ -244,13 +244,13 @@ class _HandwritingInputState extends State<HandwritingInput> {
           ),
         ),
         
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         
         // 認識結果表示（コンパクト版）
         if (recognizedText.isNotEmpty)
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: Colors.green.shade50,
               borderRadius: BorderRadius.circular(8),
@@ -274,11 +274,11 @@ class _HandwritingInputState extends State<HandwritingInput> {
             ),
           ),
         
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         
         // シンプルな操作ボタン
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildSimpleButton(
               icon: Icons.backspace,
@@ -286,13 +286,6 @@ class _HandwritingInputState extends State<HandwritingInput> {
               color: Colors.red,
               onPressed: _clear,
             ),
-            if (widget.onSwitchToKeyboard != null)
-              _buildSimpleButton(
-                icon: Icons.keyboard,
-                label: 'キーボード',
-                color: Colors.blue,
-                onPressed: widget.onSwitchToKeyboard!,
-              ),
           ],
         ),
       ],
@@ -318,7 +311,7 @@ class _HandwritingInputState extends State<HandwritingInput> {
       style: ElevatedButton.styleFrom(
         backgroundColor: color.withOpacity(0.1),
         foregroundColor: color,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),

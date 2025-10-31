@@ -149,7 +149,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'あなたの情報を教えてください',
           style: TextStyle(
             fontSize: 16,
-            color: AppColors.textSecondary,
+            color: Colors.black87,
           ),
           textAlign: TextAlign.center,
         ),
@@ -340,7 +340,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: ElevatedButton(
             onPressed: _canProceed && !_isLoading ? _handleRegister : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _canProceed ? AppColors.warning : AppColors.textSecondary,
+              backgroundColor: _canProceed ? AppColors.warning : Colors.black87,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -366,7 +366,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ? () => Navigator.pushReplacementNamed(context, '/level-select')
                 : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _canProceed ? AppColors.correct : AppColors.textSecondary,
+              backgroundColor: _canProceed ? AppColors.correct : Colors.black87,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -386,7 +386,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           '※情報は後から変更できます',
           style: TextStyle(
             fontSize: 12,
-            color: AppColors.textSecondary,
+            color: Colors.black87,
           ),
           textAlign: TextAlign.center,
         ),

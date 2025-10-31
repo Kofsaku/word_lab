@@ -107,7 +107,7 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
           'あなたに合ったレベルを選択してください',
           style: TextStyle(
             fontSize: 16,
-            color: AppColors.textSecondary,
+            color: Colors.black87,
           ),
           textAlign: TextAlign.center,
         ),
@@ -201,7 +201,7 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
                         subtitle,
                         style: TextStyle(
                           fontSize: 14,
-                          color: AppColors.textSecondary,
+                          color: Colors.black87,
                         ),
                       ),
                     ],
@@ -263,7 +263,7 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
       child: ElevatedButton(
         onPressed: _canProceed && !_isLoading ? _handleStart : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: _canProceed ? AppColors.warning : AppColors.textSecondary,
+          backgroundColor: _canProceed ? AppColors.warning : Colors.black87,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -324,7 +324,7 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
             '• ステージ選択はありません。レベル選択のみです',
             style: TextStyle(
               fontSize: 14,
-              color: AppColors.textSecondary,
+              color: Colors.black87,
               height: 1.5,
             ),
             textAlign: TextAlign.left,

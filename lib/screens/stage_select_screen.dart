@@ -11,7 +11,7 @@ class StageSelectScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('ステージ選択'),
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.background, // 背景と同じベージュ色
         elevation: 0,
       ),
       body: Container(
@@ -26,7 +26,7 @@ class StageSelectScreen extends StatelessWidget {
                 '学習するステージを選んでください',
                 style: TextStyle(
                   fontSize: 18,
-                  color: AppColors.textOnPrimary,
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -105,7 +105,7 @@ class StageSelectScreen extends StatelessWidget {
                       child: Text(
                         'Level ${stage.level}',
                         style: const TextStyle(
-                          color: AppColors.textOnPrimary,
+                          color: AppColors.textPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
@@ -126,7 +126,7 @@ class StageSelectScreen extends StatelessWidget {
                         ),
                         child: const Icon(
                           Icons.check,
-                          color: AppColors.textOnPrimary,
+                          color: AppColors.textPrimary,
                           size: 16,
                         ),
                       ),
@@ -146,7 +146,7 @@ class StageSelectScreen extends StatelessWidget {
                   stage.description,
                   style: TextStyle(
                     fontSize: 14,
-                    color: isLocked ? AppColors.textSecondary : AppColors.textSecondary,
+                    color: isLocked ? AppColors.textPrimary : AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 15),
@@ -162,7 +162,7 @@ class StageSelectScreen extends StatelessWidget {
                       '${wordsInStage.length} 単語',
                       style: TextStyle(
                         fontSize: 14,
-                        color: isLocked ? AppColors.textSecondary : AppColors.textSecondary,
+                        color: isLocked ? AppColors.textSecondary : AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(width: 20),
@@ -176,7 +176,7 @@ class StageSelectScreen extends StatelessWidget {
                       '$memorizedCount 習得済み',
                       style: TextStyle(
                         fontSize: 14,
-                        color: isLocked ? AppColors.textSecondary : AppColors.textSecondary,
+                        color: isLocked ? AppColors.textSecondary : AppColors.textPrimary,
                       ),
                     ),
                   ],

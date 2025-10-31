@@ -4,6 +4,7 @@ import '../models/word.dart';
 import '../widgets/handwriting_input.dart';
 import '../services/audio_service.dart';
 import '../services/database_helper.dart';
+import '../theme/app_colors.dart';
 
 enum TestType { multipleChoice, listening, spelling }
 
@@ -218,12 +219,12 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
                     },
                     icon: Icon(
                       isHandwritingMode ? Icons.keyboard : Icons.draw,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                     label: Text(
                       isHandwritingMode ? 'キーボード' : 'てがき',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: Colors.black,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -298,14 +299,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
   }
 
   Color _getTestTypeColor(TestType type) {
-    switch (type) {
-      case TestType.multipleChoice:
-        return Colors.blue.shade400;
-      case TestType.listening:
-        return Colors.purple.shade400;
-      case TestType.spelling:
-        return Colors.orange.shade400;
-    }
+    return AppColors.background; // 全て統一
   }
 
   Widget _buildProgressBar(double progress, TestType testType) {
@@ -316,7 +310,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
           Text(
             'もんだい ${currentIndex + 1} / ${widget.words.length}',
             style: const TextStyle(
-              color: Colors.white,
+              color: Colors.black,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -338,7 +332,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
       width: MediaQuery.of(context).size.width * 0.9,
       padding: const EdgeInsets.all(30),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.black,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
@@ -516,7 +510,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: selectedChoiceIndex != null ? Colors.white : Colors.grey.shade600,
+                  color: Colors.black,
                 ),
               ),
             ),
@@ -540,7 +534,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
         duration: const Duration(milliseconds: 200),
         height: 60,
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.shade100 : Colors.white,
+          color: isSelected ? Colors.blue.shade100 : Colors.white, // 背景色は保持
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
             color: isSelected ? Colors.blue : Colors.grey.shade300,
@@ -570,7 +564,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
 
   Widget _buildListeningInput() {
     return Container(
-      color: Colors.white,
+      color: Colors.black,
       padding: const EdgeInsets.all(20),
       child: SafeArea(
         child: Column(
@@ -680,7 +674,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
   Widget _buildHandwritingInput() {
     final testType = testSequence[currentIndex];
     return Container(
-      color: Colors.white,
+      color: Colors.black,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -778,7 +772,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -800,7 +794,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.black,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -912,7 +906,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
                 style: TextStyle(
                   fontSize: label == 'けってい' ? 16 : 18,
                   fontWeight: FontWeight.bold,
-                  color: label == 'けってい' ? Colors.white : Colors.black87,
+                  color: Colors.black,
                 ),
               ),
             ),

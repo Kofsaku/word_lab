@@ -43,6 +43,7 @@ dependencies:
   audioplayers: ^5.2.1
   google_ml_kit: ^0.16.0
   rive: ^0.13.13
+  flutter_tts: ^4.1.0
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +72,8 @@ flutter:
     - assets/images/
     - assets/images/animations/
     - assets/animations/
+    - assets/audio/
+    - assets/audio/words/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

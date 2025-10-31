@@ -61,7 +61,7 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
     setState(() {
       results.add(isCorrect);
       feedbackMessage = isCorrect ? 'せいかい！' : 'ざんねん: ${currentWord.english}';
-      feedbackColor = isCorrect ? Colors.green : Colors.red;
+      feedbackColor = isCorrect ? AppColors.correct : AppColors.incorrect;
     });
 
     if (!isCorrect) {
@@ -113,7 +113,7 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('チェックタイム'),
-        backgroundColor: Colors.orange.shade400,
+        backgroundColor: AppColors.background,
         elevation: 0,
         actions: [
           Container(
@@ -126,17 +126,17 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
               },
               icon: Icon(
                 isHandwritingMode ? Icons.keyboard : Icons.draw,
-                color: Colors.white,
+                color: AppColors.textPrimary,
               ),
               label: Text(
                 isHandwritingMode ? 'キーボード' : 'てがき',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               style: TextButton.styleFrom(
-                backgroundColor: Colors.white.withOpacity(0.2),
+                backgroundColor: AppColors.surface.withOpacity(0.8),
                 padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
@@ -189,7 +189,7 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
           Text(
             'もんだい ${currentIndex + 1} / ${widget.words.length}',
             style: const TextStyle(
-              color: Colors.white,
+              color: AppColors.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -198,8 +198,8 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
           LinearProgressIndicator(
             value: progress,
             minHeight: 10,
-            backgroundColor: Colors.white.withOpacity(0.3),
-            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+            backgroundColor: AppColors.surface.withOpacity(0.3),
+            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
           ),
         ],
       ),
@@ -211,11 +211,11 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
       width: MediaQuery.of(context).size.width * 0.9,
       padding: const EdgeInsets.all(30),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.orange.withOpacity(0.2),
+            color: AppColors.primary.withOpacity(0.2),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -230,13 +230,13 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
               vertical: 10,
             ),
             decoration: BoxDecoration(
-              color: Colors.orange.shade100,
+              color: AppColors.accent.withOpacity(0.3),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               word.partOfSpeech,
-              style: TextStyle(
-                color: Colors.orange.shade700,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
@@ -248,15 +248,15 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
             style: const TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 10),
           Text(
             'えいごでなんていう？',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
-              color: Colors.grey.shade600,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 40),
@@ -319,10 +319,10 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
               height: 52,
               margin: const EdgeInsets.symmetric(horizontal: 3),
               decoration: BoxDecoration(
-                color: hasLetter ? Colors.orange.shade100 : Colors.grey.shade100,
+                color: hasLetter ? AppColors.warning.withOpacity(0.6) : AppColors.surface.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: hasLetter ? Colors.orange : Colors.grey.shade300,
+                  color: hasLetter ? AppColors.warning : AppColors.textPrimary.withOpacity(0.3),
                   width: 2,
                 ),
               ),
@@ -332,7 +332,7 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
                   style: const TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -343,7 +343,7 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
         Text(
           '${letterCount}もじ',
           style: TextStyle(
-            color: Colors.grey.shade600,
+            color: AppColors.textPrimary.withOpacity(0.6),
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
@@ -354,22 +354,22 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
 
   Widget _buildHandwritingInput() {
     return Container(
-      color: Colors.white,
+      color: AppColors.surface,
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(15),
           child: Column(
             children: [
               // 認識された文字を表示
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                margin: const EdgeInsets.only(bottom: 15),
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
+                  color: AppColors.warning.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(15),
                   border: Border.all(
-                    color: Colors.orange.shade300,
+                    color: AppColors.warning,
                     width: 2,
                   ),
                 ),
@@ -377,73 +377,80 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
                   children: [
                     Text(
                       'にんしきされた文字',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade600,
+                        color: AppColors.textPrimary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 5),
                     Text(
                       _controller.text.isEmpty ? '---' : _controller.text.toUpperCase(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: _controller.text.isEmpty ? Colors.grey.shade400 : Colors.black87,
+                        color: AppColors.textPrimary,
                         letterSpacing: 3,
                       ),
                     ),
                   ],
                 ),
               ),
-              HandwritingInput(
-                onTextChanged: (text) {
-                  setState(() {
-                    _controller.text = text;
-                  });
-                },
-                onClear: () {
-                  setState(() {
-                    _controller.clear();
-                  });
-                },
+              SizedBox(
+                height: 200,
+                child: HandwritingInput(
+                  onTextChanged: (text) {
+                    Future.microtask(() {
+                      setState(() {
+                        _controller.text = text;
+                      });
+                    });
+                  },
+                  onClear: () {
+                    Future.microtask(() {
+                      setState(() {
+                        _controller.clear();
+                      });
+                    });
+                  },
+                ),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 8),
               // 説明テキスト
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: AppColors.accent.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       Icons.info_outline,
-                      color: Colors.blue.shade600,
+                      color: AppColors.accent,
                       size: 20,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         'アルファベットを1文字ずつ書いてね',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14,
-                          color: Colors.blue.shade700,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 8),
               SizedBox(
                 width: double.infinity,
-                height: 60,
+                height: 50,
                 child: ElevatedButton(
                   onPressed: _checkAnswer,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                    backgroundColor: AppColors.warning,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
@@ -451,10 +458,10 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
                   ),
                   child: const Text(
                     'けってい',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -476,7 +483,7 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -545,10 +552,10 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
           height: 48,
           margin: EdgeInsets.symmetric(horizontal: keySpacing),
           decoration: BoxDecoration(
-            color: Colors.grey.shade200,
+            color: AppColors.surface.withOpacity(0.8),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: Colors.grey.shade400,
+              color: AppColors.textPrimary.withOpacity(0.4),
               width: 1,
             ),
           ),
@@ -558,7 +565,7 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
               style: TextStyle(
                 fontSize: keyWidth < 30 ? 16 : 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: AppColors.textPrimary,
               ),
             ),
           ),
@@ -575,7 +582,7 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
         height: 48,
         margin: const EdgeInsets.symmetric(horizontal: 2),
         decoration: BoxDecoration(
-          color: label == 'けってい' ? Colors.orange : Colors.grey.shade300,
+          color: label == 'けってい' ? AppColors.warning : AppColors.surface.withOpacity(0.6),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Center(
@@ -588,7 +595,7 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
                 style: TextStyle(
                   fontSize: label == 'けってい' ? 16 : 18,
                   fontWeight: FontWeight.bold,
-                  color: label == 'けってい' ? Colors.white : Colors.black87,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ),

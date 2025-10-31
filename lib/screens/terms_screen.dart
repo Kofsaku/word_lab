@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 class TermsScreen extends StatelessWidget {
   const TermsScreen({super.key});
@@ -8,8 +9,8 @@ class TermsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('利用規約'),
-        backgroundColor: Colors.grey.shade700,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.background,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: Container(
@@ -46,7 +47,7 @@ class TermsScreen extends StatelessWidget {
           Icon(
             Icons.description,
             size: 48,
-            color: Colors.white,
+            color: AppColors.textPrimary,
           ),
           SizedBox(height: 16),
           Text(
@@ -54,7 +55,7 @@ class TermsScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppColors.textPrimary,
             ),
           ),
           SizedBox(height: 8),
@@ -62,7 +63,7 @@ class TermsScreen extends StatelessWidget {
             '最終更新日：2024年10月6日',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white70,
+              color: Colors.black87,
             ),
           ),
         ],
@@ -74,7 +75,7 @@ class TermsScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.textPrimary,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -202,7 +203,7 @@ class TermsScreen extends StatelessWidget {
               '本規約に関するお問い合わせは、アプリ内のお問い合わせフォームよりご連絡ください。',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey,
+                color: Colors.black87,
               ),
             ),
           ),

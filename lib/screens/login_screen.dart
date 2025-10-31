@@ -176,7 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
           onPressed: _isLoading ? null : _handleAppleLogin,
           icon: Icons.apple,
           text: 'Appleでログイン',
-          backgroundColor: AppColors.textPrimary,
+          backgroundColor: AppColors.primary,
           textColor: AppColors.textOnPrimary,
         ),
         const SizedBox(height: 12),
@@ -184,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
           onPressed: _isLoading ? null : _handleGuestLogin,
           icon: Icons.person_outline,
           text: 'ゲストログイン',
-          backgroundColor: AppColors.textSecondary,
+          backgroundColor: AppColors.accent,
           textColor: AppColors.textOnPrimary,
         ),
       ],
@@ -226,18 +226,18 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildDivider() {
     return Row(
       children: [
-        Expanded(child: Divider(color: AppColors.textSecondary)),
+        Expanded(child: Divider(color: Colors.black87)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'または',
             style: TextStyle(
-              color: AppColors.textSecondary,
+              color: Colors.black87,
               fontSize: 14,
             ),
           ),
         ),
-        Expanded(child: Divider(color: AppColors.textSecondary)),
+        Expanded(child: Divider(color: Colors.black87)),
       ],
     );
   }
@@ -351,7 +351,7 @@ class _LoginScreenState extends State<LoginScreen> {
           'アカウントをお持ちでない場合は、ログイン後に会員登録画面に移ります',
           style: TextStyle(
             fontSize: 12,
-            color: AppColors.textSecondary,
+            color: Colors.black87,
           ),
           textAlign: TextAlign.center,
         ),

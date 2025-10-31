@@ -187,7 +187,7 @@ class _ResultScreenState extends State<ResultScreen>
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.black,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
@@ -222,7 +222,7 @@ class _ResultScreenState extends State<ResultScreen>
                   height: 220,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white,
+                    color: Colors.black,
                     boxShadow: [
                       BoxShadow(
                         color: _getScoreColor().withOpacity(0.3),
@@ -298,7 +298,7 @@ class _ResultScreenState extends State<ResultScreen>
           style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Colors.black,
           ),
           textAlign: TextAlign.center,
         ),
@@ -310,7 +310,7 @@ class _ResultScreenState extends State<ResultScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
+        color: Colors.black,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -347,7 +347,7 @@ class _ResultScreenState extends State<ResultScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.black,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -536,7 +536,7 @@ class _ResultScreenState extends State<ResultScreen>
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 side: const BorderSide(
-                  color: Colors.white,
+                  color: Colors.black,
                   width: 2,
                 ),
                 shape: RoundedRectangleBorder(
@@ -548,7 +548,7 @@ class _ResultScreenState extends State<ResultScreen>
                 children: [
                   const Icon(
                     Icons.refresh,
-                    color: Colors.white,
+                    color: Colors.black,
                     size: 24,
                   ),
                   const SizedBox(width: 10),
@@ -557,7 +557,7 @@ class _ResultScreenState extends State<ResultScreen>
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                   ),
                 ],

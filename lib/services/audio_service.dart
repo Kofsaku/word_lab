@@ -1,26 +1,49 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class AudioService {
   static final AudioService instance = AudioService._init();
   final AudioPlayer _audioPlayer = AudioPlayer();
+  final FlutterTts _flutterTts = FlutterTts();
   
-  AudioService._init();
+  AudioService._init() {
+    _initializeTts();
+  }
+
+  Future<void> _initializeTts() async {
+    // TTS設定を初期化
+    await _flutterTts.setLanguage("en-US");
+    await _flutterTts.setSpeechRate(0.5); // 少しゆっくり読む
+    await _flutterTts.setVolume(1.0);
+    await _flutterTts.setPitch(1.0);
+  }
 
   Future<void> playWordAudio(String word) async {
-    // new_req仕様：ダミー実装（効果音で代替）
     try {
       // 実際は5000語の音声ファイルを再生
       final audioFileName = 'audio/words/${word.toLowerCase()}.mp3';
       
       try {
         await _audioPlayer.play(AssetSource(audioFileName));
+        print('Playing audio file for: $word');
       } catch (e) {
-        // 音声ファイルがない場合、効果音で代替
-        await _playWordEffect(word);
+        print('Audio file not found for: $word, using TTS instead');
+        // 音声ファイルがない場合、TTSで英語音声を再生
+        await _playWordTts(word);
       }
     } catch (e) {
-      print('Word audio unavailable for: $word');
+      print('Word audio unavailable for: $word, using TTS fallback');
+      await _playWordTts(word);
+    }
+  }
+
+  Future<void> _playWordTts(String word) async {
+    try {
+      print('Playing TTS for word: $word');
+      await _flutterTts.speak(word);
+    } catch (e) {
+      print('TTS failed for: $word, using sound effect fallback');
       await _playWordEffect(word);
     }
   }
@@ -28,29 +51,42 @@ class AudioService {
   Future<void> _playWordEffect(String word) async {
     // 単語の長さに応じて異なる効果音パターン
     try {
+      print('Playing word effect for: $word (length: ${word.length})');
+      
       if (word.length <= 4) {
         await SystemSound.play(SystemSoundType.click);
+        await HapticFeedback.lightImpact();
       } else if (word.length <= 7) {
         await SystemSound.play(SystemSoundType.click);
-        await Future.delayed(const Duration(milliseconds: 100));
+        await HapticFeedback.lightImpact();
+        await Future.delayed(const Duration(milliseconds: 150));
         await SystemSound.play(SystemSoundType.click);
+        await HapticFeedback.lightImpact();
       } else {
         await SystemSound.play(SystemSoundType.click);
-        await Future.delayed(const Duration(milliseconds: 100));
+        await HapticFeedback.lightImpact();
+        await Future.delayed(const Duration(milliseconds: 150));
         await SystemSound.play(SystemSoundType.click);
-        await Future.delayed(const Duration(milliseconds: 100));
+        await HapticFeedback.lightImpact();
+        await Future.delayed(const Duration(milliseconds: 150));
         await SystemSound.play(SystemSoundType.click);
+        await HapticFeedback.lightImpact();
       }
       
-      print('Playing audio effect for: $word');
+      print('Completed audio effect for: $word');
     } catch (e) {
       print('Error with audio effect: $e');
     }
   }
 
   Future<void> playTTS(String text) async {
-    // 将来のTTS実装用（現在はダミー）
-    await _playWordEffect(text);
+    try {
+      print('Playing TTS for text: $text');
+      await _flutterTts.speak(text);
+    } catch (e) {
+      print('TTS failed for: $text');
+      await _playWordEffect(text);
+    }
   }
 
   Future<void> playCorrectSound() async {
@@ -125,5 +161,6 @@ class AudioService {
 
   void dispose() {
     _audioPlayer.dispose();
+    _flutterTts.stop();
   }
 }

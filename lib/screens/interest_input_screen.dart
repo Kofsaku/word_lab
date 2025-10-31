@@ -151,11 +151,11 @@ class _InterestInputScreenState extends State<InterestInputScreen>
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: AppColors.textPrimary.withOpacity(0.1),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -168,17 +168,17 @@ class _InterestInputScreenState extends State<InterestInputScreen>
             width: 100,
             height: 100,
             decoration: BoxDecoration(
-              color: Colors.orange.shade100,
+              color: AppColors.warning.withOpacity(0.3),
               borderRadius: BorderRadius.circular(50),
               border: Border.all(
-                color: Colors.orange.shade300,
+                color: AppColors.warning,
                 width: 3,
               ),
             ),
             child: Icon(
               Icons.psychology,
               size: 60,
-              color: Colors.orange.shade600,
+              color: AppColors.warning,
             ),
           ),
           const SizedBox(height: 16),
@@ -187,7 +187,7 @@ class _InterestInputScreenState extends State<InterestInputScreen>
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -195,7 +195,7 @@ class _InterestInputScreenState extends State<InterestInputScreen>
             'よくがんばったね！\n次はステージクリアテストだよ！',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey.shade700,
+              color: AppColors.textPrimary,
               height: 1.4,
             ),
             textAlign: TextAlign.center,
@@ -209,10 +209,10 @@ class _InterestInputScreenState extends State<InterestInputScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: AppColors.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white,
+          color: AppColors.primary,
           width: 2,
         ),
       ),
@@ -223,7 +223,7 @@ class _InterestInputScreenState extends State<InterestInputScreen>
             children: [
               Icon(
                 Icons.quiz,
-                color: Colors.purple.shade600,
+                color: AppColors.primary,
                 size: 24,
               ),
               const SizedBox(width: 8),
@@ -232,7 +232,7 @@ class _InterestInputScreenState extends State<InterestInputScreen>
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],
@@ -246,7 +246,7 @@ class _InterestInputScreenState extends State<InterestInputScreen>
             '音声再生はありません。',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey.shade700,
+              color: AppColors.textPrimary,
               height: 1.5,
             ),
           ),
@@ -259,11 +259,11 @@ class _InterestInputScreenState extends State<InterestInputScreen>
     return Container(
       padding: const EdgeInsets.all(25),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.indigo.withOpacity(0.2),
+            color: AppColors.accent.withOpacity(0.2),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -276,7 +276,7 @@ class _InterestInputScreenState extends State<InterestInputScreen>
             children: [
               Icon(
                 Icons.edit,
-                color: Colors.indigo.shade400,
+                color: AppColors.accent,
                 size: 24,
               ),
               const SizedBox(width: 10),
@@ -285,7 +285,7 @@ class _InterestInputScreenState extends State<InterestInputScreen>
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],
@@ -296,7 +296,7 @@ class _InterestInputScreenState extends State<InterestInputScreen>
             'より面白い問題文が生成されます！',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey.shade600,
+              color: AppColors.textPrimary,
               height: 1.4,
             ),
           ),
@@ -308,34 +308,34 @@ class _InterestInputScreenState extends State<InterestInputScreen>
             decoration: InputDecoration(
               hintText: '例：宇宙探索、料理、スポーツ、映画、音楽、旅行、IT技術、環境問題など...',
               hintStyle: TextStyle(
-                color: Colors.grey.shade400,
+                color: AppColors.textPrimary.withOpacity(0.6),
               ),
               filled: true,
-              fillColor: Colors.grey.shade50,
+              fillColor: AppColors.surface.withOpacity(0.8),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
                 borderSide: BorderSide(
-                  color: Colors.grey.shade300,
+                  color: AppColors.textPrimary.withOpacity(0.3),
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
                 borderSide: BorderSide(
-                  color: Colors.grey.shade300,
+                  color: AppColors.textPrimary.withOpacity(0.3),
                 ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
                 borderSide: BorderSide(
-                  color: Colors.indigo.shade400,
+                  color: AppColors.accent,
                   width: 2,
                 ),
               ),
               counterText: '${_controller.text.length}/200',
               counterStyle: TextStyle(
                 color: _controller.text.length > 180 
-                    ? Colors.orange 
-                    : Colors.grey,
+                    ? AppColors.incorrect 
+                    : AppColors.textPrimary.withOpacity(0.6),
               ),
             ),
             style: const TextStyle(
@@ -350,14 +350,14 @@ class _InterestInputScreenState extends State<InterestInputScreen>
                 Icon(
                   Icons.info_outline,
                   size: 16,
-                  color: Colors.orange.shade600,
+                  color: AppColors.warning,
                 ),
                 const SizedBox(width: 5),
                 Text(
                   '5文字以上入力してください',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.orange.shade600,
+                    color: AppColors.warning,
                   ),
                 ),
               ],
@@ -379,7 +379,7 @@ class _InterestInputScreenState extends State<InterestInputScreen>
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Colors.white.withOpacity(0.9),
+              color: AppColors.textPrimary,
             ),
           ),
         ),
@@ -399,10 +399,10 @@ class _InterestInputScreenState extends State<InterestInputScreen>
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: AppColors.surface.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
+                      color: AppColors.surface.withOpacity(0.3),
                       width: 1,
                     ),
                   ),
@@ -413,7 +413,7 @@ class _InterestInputScreenState extends State<InterestInputScreen>
                           : _exampleInterests[index],
                       style: const TextStyle(
                         fontSize: 12,
-                        color: Colors.black87,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ),
@@ -437,26 +437,26 @@ class _InterestInputScreenState extends State<InterestInputScreen>
             onPressed: _isInputValid ? _navigateToStageTest : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: _isInputValid 
-                  ? Colors.indigo 
-                  : Colors.grey.shade400,
-              foregroundColor: Colors.white,
+                  ? AppColors.accent 
+                  : AppColors.textSecondary.withOpacity(0.3),
+              foregroundColor: AppColors.textPrimary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
               elevation: _isInputValid ? 8 : 2,
-              shadowColor: Colors.indigo.withOpacity(0.3),
+              shadowColor: AppColors.accent.withOpacity(0.3),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.quiz, color: Colors.black87, size: 24),
+                const Icon(Icons.quiz, color: AppColors.textPrimary, size: 24),
                 const SizedBox(width: 8),
                 Text(
                   _isInputValid ? 'ステージクリアテストへ' : '興味・関心を入力してください',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -480,7 +480,7 @@ class _InterestInputScreenState extends State<InterestInputScreen>
           child: Text(
             'スキップして進む',
             style: TextStyle(
-              color: AppColors.textSecondary,
+              color: AppColors.textPrimary,
               fontSize: 14,
             ),
           ),

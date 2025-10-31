@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/dummy_data.dart';
 import '../models/test_question.dart';
+import '../theme/app_colors.dart';
 
 class StageTestScreen extends StatefulWidget {
   final String stageId;
@@ -139,7 +140,7 @@ class _StageTestScreenState extends State<StageTestScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('ステージクリアテスト'),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: AppColors.background,
         elevation: 0,
       ),
       body: Container(
@@ -178,10 +179,10 @@ class _StageTestScreenState extends State<StageTestScreen>
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
               margin: const EdgeInsets.only(bottom: 15),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.black,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.3),
+                  color: Colors.black,
                   width: 1,
                 ),
               ),
@@ -190,7 +191,7 @@ class _StageTestScreenState extends State<StageTestScreen>
                 children: [
                   const Icon(
                     Icons.psychology,
-                    color: Colors.white,
+                    color: Colors.black,
                     size: 16,
                   ),
                   const SizedBox(width: 8),
@@ -200,7 +201,7 @@ class _StageTestScreenState extends State<StageTestScreen>
                           ? '${widget.userInterest!.substring(0, 30)}...'
                           : widget.userInterest!,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: Colors.black,
                         fontSize: 12,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -216,7 +217,7 @@ class _StageTestScreenState extends State<StageTestScreen>
               Text(
                 '問題 ${currentQuestionIndex + 1} / ${questions.length}',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -227,21 +228,21 @@ class _StageTestScreenState extends State<StageTestScreen>
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.black,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   children: [
                     const Icon(
                       Icons.timer,
-                      color: Colors.white,
+                      color: Colors.black,
                       size: 16,
                     ),
                     const SizedBox(width: 5),
                     Text(
                       '${(questions.length - currentQuestionIndex) * 10}秒',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: Colors.black,
                         fontSize: 14,
                       ),
                     ),
@@ -285,7 +286,7 @@ class _StageTestScreenState extends State<StageTestScreen>
       width: double.infinity,
       padding: const EdgeInsets.all(30),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.black,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
@@ -412,7 +413,7 @@ class _StageTestScreenState extends State<StageTestScreen>
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Colors.black,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: Colors.deepPurple.shade200,
@@ -458,7 +459,7 @@ class _StageTestScreenState extends State<StageTestScreen>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.black,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: Colors.deepPurple.shade200,
@@ -487,7 +488,7 @@ class _StageTestScreenState extends State<StageTestScreen>
             }
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.deepPurple,
+            backgroundColor: AppColors.background,
             padding: const EdgeInsets.symmetric(
               horizontal: 50,
               vertical: 15,
@@ -502,7 +503,7 @@ class _StageTestScreenState extends State<StageTestScreen>
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Colors.black,
             ),
           ),
         ),
