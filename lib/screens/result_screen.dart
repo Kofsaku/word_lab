@@ -113,11 +113,7 @@ class _ResultScreenState extends State<ResultScreen>
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      _buildScoreSection(),
-                      const SizedBox(height: 30),
                       _buildBoxMovementSection(),
-                      const SizedBox(height: 30),
-                      _buildDetailedResults(),
                       const SizedBox(height: 30),
                       _buildActionButtons(),
                     ],
@@ -184,7 +180,7 @@ class _ResultScreenState extends State<ResultScreen>
                   _getCharacterMessage(),
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                     height: 1.3,
                   ),
                 ),
@@ -207,7 +203,7 @@ class _ResultScreenState extends State<ResultScreen>
     return 'ドンマイ！次は必ずできるよ！';
   }
 
-  Widget _buildScoreSection() {
+  Widget _buildResultsSection() {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -233,35 +229,7 @@ class _ResultScreenState extends State<ResultScreen>
           ),
           const SizedBox(height: 24),
           
-          // スコア表示
-          AnimatedBuilder(
-            animation: _scoreAnimation,
-            builder: (context, child) {
-              return Column(
-                children: [
-                  Text(
-                    '${_scoreAnimation.value.toInt()}',
-                    style: TextStyle(
-                      fontSize: 64,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.correct,
-                    ),
-                  ),
-                  Text(
-                    'スコア',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // 詳細結果
+          // 詳細結果（スコア表示を削除）
           Row(
             children: [
               Expanded(
@@ -321,7 +289,7 @@ class _ResultScreenState extends State<ResultScreen>
             '$percentage%',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
           ),
         ],
@@ -415,7 +383,7 @@ class _ResultScreenState extends State<ResultScreen>
                   result['japanese'],
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -448,13 +416,13 @@ class _ResultScreenState extends State<ResultScreen>
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.3),
+                color: Colors.orange.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 Icons.rocket_launch,
                 size: 16,
-                color: AppColors.warning,
+                color: Colors.orange,
               ),
             ),
         ],
@@ -470,7 +438,7 @@ class _ResultScreenState extends State<ResultScreen>
       color = AppColors.primary;
       text = '∞';
     } else {
-      color = isDestination ? AppColors.accent : Colors.black87;
+      color = isDestination ? AppColors.correct : AppColors.primary;
       text = boxNumber.toString();
     }
     
@@ -561,7 +529,7 @@ class _ResultScreenState extends State<ResultScreen>
             label,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
           ),
           Text(

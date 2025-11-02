@@ -102,9 +102,9 @@ class _HistoryScreenState extends State<HistoryScreen>
           labelColor: AppColors.textPrimary,
           unselectedLabelColor: AppColors.textPrimary.withOpacity(0.6),
           tabs: const [
-            Tab(text: '今週', icon: Icon(Icons.calendar_today, size: 20)),
             Tab(text: 'BOX状況', icon: Icon(Icons.inventory, size: 20)),
-            Tab(text: '詳細履歴', icon: Icon(Icons.list, size: 20)),
+            Tab(text: '4技能', icon: Icon(Icons.bar_chart, size: 20)),
+            Tab(text: '習得単語', icon: Icon(Icons.library_books, size: 20)),
           ],
         ),
       ),
@@ -115,9 +115,9 @@ class _HistoryScreenState extends State<HistoryScreen>
         child: TabBarView(
           controller: _tabController,
           children: [
-            _buildWeeklyTab(),
             _buildBoxStatusTab(),
-            _buildDetailHistoryTab(),
+            _buildSkillsTab(),
+            _buildMasteredWordsTab(),
           ],
         ),
       ),
@@ -448,59 +448,83 @@ class _HistoryScreenState extends State<HistoryScreen>
             
             return Container(
               margin: const EdgeInsets.only(bottom: 16),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: GestureDetector(
+                onTap: () => _showBoxWordsDialog(box['box'], box['color']),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: box['color'].withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: box['color'].withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
                     children: [
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              color: box['color'],
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Center(
-                              child: Text(
-                                box['box'].toString(),
-                                style: const TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                          Row(
+                            children: [
+                              Container(
+                                width: 24,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  color: box['color'],
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    box['box'].toString(),
+                                    style: const TextStyle(
+                                      color: AppColors.surface,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'BOX ${box['box']}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'BOX ${box['box']}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
+                          Row(
+                            children: [
+                              Text(
+                                '$count語 ($percentage%)',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: box['color'],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: box['color'],
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                      Text(
-                        '$count語 ($percentage%)',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: box['color'],
-                        ),
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(
+                        value: count / totalWords,
+                        backgroundColor: AppColors.surface.withOpacity(0.6),
+                        valueColor: AlwaysStoppedAnimation<Color>(box['color']),
+                        minHeight: 6,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: count / totalWords,
-                    backgroundColor: AppColors.surface.withOpacity(0.6),
-                    valueColor: AlwaysStoppedAnimation<Color>(box['color']),
-                    minHeight: 6,
-                  ),
-                ],
+                ),
               ),
             );
           }).toList(),
@@ -747,6 +771,433 @@ class _HistoryScreenState extends State<HistoryScreen>
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  void _showBoxWordsDialog(dynamic boxNumber, Color boxColor) {
+    // ダミーデータ：BOX別の単語リスト
+    final Map<dynamic, List<Map<String, dynamic>>> boxWords = {
+      1: [
+        {'english': 'apple', 'japanese': 'りんご', 'accuracy': 45},
+        {'english': 'book', 'japanese': '本', 'accuracy': 67},
+        {'english': 'cat', 'japanese': '猫', 'accuracy': 33},
+        {'english': 'dog', 'japanese': '犬', 'accuracy': 78},
+        {'english': 'egg', 'japanese': '卵', 'accuracy': 56},
+      ],
+      2: [
+        {'english': 'beautiful', 'japanese': '美しい', 'accuracy': 82},
+        {'english': 'happy', 'japanese': '幸せな', 'accuracy': 75},
+        {'english': 'study', 'japanese': '勉強する', 'accuracy': 69},
+        {'english': 'friend', 'japanese': '友達', 'accuracy': 88},
+      ],
+      3: [
+        {'english': 'computer', 'japanese': 'コンピューター', 'accuracy': 91},
+        {'english': 'important', 'japanese': '重要な', 'accuracy': 85},
+        {'english': 'develop', 'japanese': '開発する', 'accuracy': 79},
+      ],
+      4: [
+        {'english': 'innovation', 'japanese': '革新', 'accuracy': 94},
+        {'english': 'technology', 'japanese': '技術', 'accuracy': 87},
+      ],
+      5: [
+        {'english': 'comprehensive', 'japanese': '包括的な', 'accuracy': 96},
+        {'english': 'collaborate', 'japanese': '協力する', 'accuracy': 93},
+      ],
+      '∞': [
+        {'english': 'run', 'japanese': '走る', 'accuracy': 100},
+        {'english': 'water', 'japanese': '水', 'accuracy': 100},
+        {'english': 'school', 'japanese': '学校', 'accuracy': 100},
+      ],
+    };
+
+    final words = boxWords[boxNumber] ?? [];
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          height: MediaQuery.of(context).size.height * 0.8,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ヘッダー
+              Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: boxColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Text(
+                        boxNumber.toString(),
+                        style: const TextStyle(
+                          color: AppColors.surface,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'BOX $boxNumber の単語',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          '${words.length}語',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: boxColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              
+              // 単語リスト
+              Expanded(
+                child: ListView.builder(
+                  itemCount: words.length,
+                  itemBuilder: (context, index) {
+                    final word = words[index];
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: boxColor.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  word['english'],
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  word['japanese'],
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: AppColors.textPrimary.withOpacity(0.7),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _getAccuracyColor(word['accuracy']).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: _getAccuracyColor(word['accuracy']),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              '${word['accuracy']}%',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: _getAccuracyColor(word['accuracy']),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _getAccuracyColor(int accuracy) {
+    if (accuracy >= 90) return AppColors.correct;
+    if (accuracy >= 70) return AppColors.warning;
+    return AppColors.incorrect;
+  }
+
+
+  Widget _buildSkillsTab() {
+    // ダミーデータ：4技能評価
+    final skillsData = [
+      {'skill': 'Reading', 'score': 85, 'color': AppColors.primary},
+      {'skill': 'Listening', 'score': 72, 'color': AppColors.accent},
+      {'skill': 'Speaking', 'score': 68, 'color': AppColors.warning},
+      {'skill': 'Writing', 'score': 79, 'color': AppColors.correct},
+    ];
+    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          // 4技能概要
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                const Text(
+                  '4技能評価',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                
+                // 技能別グラフ
+                ...skillsData.map((skill) {
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              skill['skill'] as String,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              '${skill['score'] as int}%',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: skill['color'] as Color,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        LinearProgressIndicator(
+                          value: (skill['score'] as int) / 100,
+                          backgroundColor: AppColors.surface.withOpacity(0.3),
+                          valueColor: AlwaysStoppedAnimation<Color>(skill['color'] as Color),
+                          minHeight: 8,
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMasteredWordsTab() {
+    // ダミーデータ：習得した単語
+    final masteredWords = [
+      {'english': 'run', 'japanese': '走る', 'accuracy': 100, 'category': 'BOX∞'},
+      {'english': 'water', 'japanese': '水', 'accuracy': 100, 'category': 'BOX∞'},
+      {'english': 'school', 'japanese': '学校', 'accuracy': 100, 'category': 'BOX∞'},
+      {'english': 'comprehensive', 'japanese': '包括的な', 'accuracy': 96, 'category': 'BOX5'},
+      {'english': 'collaborate', 'japanese': '協力する', 'accuracy': 93, 'category': 'BOX5'},
+      {'english': 'innovation', 'japanese': '革新', 'accuracy': 94, 'category': 'BOX4'},
+      {'english': 'technology', 'japanese': '技術', 'accuracy': 87, 'category': 'BOX4'},
+    ];
+    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          // 習得単語概要
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                const Text(
+                  '習得した単語',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildStatCard(
+                        'ワードプラス',
+                        '${masteredWords.length}語',
+                        Icons.star,
+                        AppColors.warning,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildStatCard(
+                        '平均正答率',
+                        '${(masteredWords.map((w) => w['accuracy'] as int).reduce((a, b) => a + b) / masteredWords.length).round()}%',
+                        Icons.analytics,
+                        AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          
+          // 単語リスト
+          ...masteredWords.map((word) {
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _getAccuracyColor(word['accuracy'] as int).withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          word['english'] as String,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          word['japanese'] as String,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textPrimary.withOpacity(0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          word['category'] as String,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.accent,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: _getAccuracyColor(word['accuracy'] as int).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: _getAccuracyColor(word['accuracy'] as int),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          '${word['accuracy'] as int}%',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: _getAccuracyColor(word['accuracy'] as int),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
         ],
       ),
     );

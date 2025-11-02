@@ -19,8 +19,8 @@ class TermsScreen extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.grey.shade700,
-              Colors.grey.shade50,
+              Colors.green.shade700,
+              Colors.green.shade50,
             ],
           ),
         ),

@@ -462,10 +462,10 @@ class _StageTestScreenState extends State<StageTestScreen>
         children: [
           Text(
             '${currentIndex + 1}/${questions.length}問',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: Colors.black,
             ),
           ),
           const SizedBox(height: 8),
@@ -499,7 +499,7 @@ class _StageTestScreenState extends State<StageTestScreen>
           child: Text(
             'セット$setNumber',
             style: const TextStyle(
-              color: AppColors.surface,
+              color: Colors.black,
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
@@ -509,7 +509,7 @@ class _StageTestScreenState extends State<StageTestScreen>
         Text(
           '$questionInSet/3問',
           style: const TextStyle(
-            color: AppColors.surface,
+            color: Colors.black,
             fontSize: 14,
           ),
         ),
