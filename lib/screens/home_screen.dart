@@ -158,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(width: 8),
               const Text(
-                'ぼうけんの進み具合(すすみぐあい)',
+                '学習の進み具合',
                 style: TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 16,
