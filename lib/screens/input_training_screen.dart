@@ -635,15 +635,15 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
               Text(
                 words[currentIndex].japanese,
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 24,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: AppColors.accent.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -651,7 +651,7 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
                 child: Text(
                   words[currentIndex].partOfSpeech,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 18,
                     color: AppColors.accent,
                     fontWeight: FontWeight.w500,
                   ),

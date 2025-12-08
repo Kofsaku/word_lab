@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive/rive.dart';
 import '../models/word.dart';
 import '../widgets/handwriting_input.dart';
 import '../widgets/recognition_candidates.dart';
@@ -150,7 +151,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
 
   void _showAnswerFeedback(bool isCorrect) {
     setState(() {
-      feedbackMessage = isCorrect ? '正解！' : '不正解...';
+      feedbackMessage = isCorrect ? '正解' : '不正解';
       feedbackColor = isCorrect ? AppColors.correct : AppColors.incorrect;
       showFeedback = true;
     });
@@ -221,13 +222,35 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
                 'userAnswer': '',
                 'questionType': currentQuestionType,
               });
-              _moveToNext();
+              // 正解を表示してから次へ
+              _showGiveUpFeedback();
             },
             child: const Text('降参する'),
           ),
         ],
       ),
     );
+  }
+
+  void _showGiveUpFeedback() {
+    final question = questions[currentIndex];
+
+    // 音声再生（日→英問題の場合）
+    if (currentQuestionType == QuestionType.japaneseToEnglish) {
+      _audioService.playWordAudio(question['word'].english);
+    }
+
+    setState(() {
+      feedbackMessage = '正解は...';
+      feedbackColor = AppColors.warning;
+      showFeedback = true;
+    });
+
+    _feedbackController.forward().then((_) {
+      Future.delayed(const Duration(seconds: 2), () {
+        _moveToNext();
+      });
+    });
   }
 
   @override
@@ -260,13 +283,18 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(15),
-      child: Row(
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.close, color: AppColors.textPrimary, size: 28),
+          // 左側の閉じるボタン
+          Align(
+            alignment: Alignment.centerLeft,
+            child: IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.close, color: AppColors.textPrimary, size: 28),
+            ),
           ),
-          const Spacer(),
+          // 中央のタイトル
           Column(
             children: [
               const Text(
@@ -286,9 +314,26 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
               ),
             ],
           ),
-          const Spacer(),
-          const SizedBox(width: 48),
+          // 右側のキャラクター
+          Align(
+            alignment: Alignment.centerRight,
+            child: _buildCharacterAnimation(),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCharacterAnimation() {
+    return _ContinuousBouncingWidget(
+      child: SizedBox(
+        width: 60,
+        height: 60,
+        child: RiveAnimation.asset(
+          'assets/animations/pikotan_animation.riv',
+          animations: const ['idle', 'walk_L', 'walk_R', 'sleep_A', 'flag_idle'],
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }
@@ -321,7 +366,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
               ],
             ),
           ),
-          if (showFeedback) _buildFeedbackOverlay(),
+          if (showFeedback) Positioned.fill(child: _buildFeedbackOverlay()),
         ],
       ),
     );
@@ -410,7 +455,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
   Widget _buildChoiceButtons() {
     final question = questions[currentIndex];
     final choices = question['choices'] as List<String>;
-    
+
     return Column(
       children: List.generate(choices.length, (index) {
         final isSelected = selectedChoiceIndex == index;
@@ -420,10 +465,12 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
           child: ElevatedButton(
             onPressed: showFeedback ? null : () {
               setState(() => selectedChoiceIndex = index);
+              // 選択したら即座に回答処理
+              _handleAnswer();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: isSelected 
-                  ? AppColors.accent.withOpacity(0.7) 
+              backgroundColor: isSelected
+                  ? AppColors.accent.withOpacity(0.7)
                   : AppColors.surface.withOpacity(0.6),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
@@ -736,6 +783,11 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
   }
 
   Widget _buildBottomActions() {
+    // 4択問題（英→日）では下部ボタンを非表示
+    if (currentQuestionType == QuestionType.englishToJapanese) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
@@ -762,7 +814,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
             ),
           ),
           const SizedBox(width: 12),
-          
+
           // 回答ボタン
           Expanded(
             flex: 2,
@@ -791,6 +843,8 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
   }
 
   Widget _buildFeedbackOverlay() {
+    final word = questions[currentIndex]['word'] as Word;
+
     return Container(
       decoration: BoxDecoration(
         color: feedbackColor?.withOpacity(0.9),
@@ -801,6 +855,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
           scale: _feedbackController,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(
                 feedbackColor == AppColors.correct ? Icons.check_circle : Icons.cancel,
@@ -815,17 +870,37 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
+                textAlign: TextAlign.center,
               ),
-              if (feedbackColor == AppColors.incorrect) ...[
-                const SizedBox(height: 12),
-                Text(
-                  '正解: ${questions[currentIndex]['correctAnswer']}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    color: AppColors.textPrimary,
-                  ),
+              const SizedBox(height: 20),
+              // 単語情報を表示
+              Text(
+                word.english,
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
                 ),
-              ],
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                word.japanese,
+                style: const TextStyle(
+                  fontSize: 22,
+                  color: AppColors.textPrimary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                word.partOfSpeech,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textPrimary.withOpacity(0.7),
+                ),
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
         ),
@@ -845,10 +920,87 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
     if (_textController.text.isNotEmpty) {
       setState(() {
         _textController.text = _textController.text.substring(
-          0, 
+          0,
           _textController.text.length - 1,
         );
       });
     }
+  }
+}
+
+class _ContinuousBouncingWidget extends StatefulWidget {
+  final Widget child;
+
+  const _ContinuousBouncingWidget({required this.child});
+
+  @override
+  State<_ContinuousBouncingWidget> createState() => _ContinuousBouncingWidgetState();
+}
+
+class _ContinuousBouncingWidgetState extends State<_ContinuousBouncingWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _floatAnimation;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+
+    _floatAnimation = Tween<double>(
+      begin: -6.0,
+      end: 6.0,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.95,
+      end: 1.05,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+
+    _controller.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _floatAnimation.value),
+          child: Transform.scale(
+            scale: _scaleAnimation.value,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.2),
+                    blurRadius: 6,
+                    offset: Offset(0, _floatAnimation.value * 0.3),
+                  ),
+                ],
+              ),
+              child: widget.child,
+            ),
+          ),
+        );
+      },
+    );
   }
 }

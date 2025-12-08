@@ -41,7 +41,7 @@ dependencies:
   sqflite: ^2.3.0
   path: ^1.8.3
   audioplayers: ^5.2.1
-  google_ml_kit: ^0.16.0
+  google_ml_kit: ^0.20.0
   rive: ^0.13.13
   flutter_tts: ^4.1.0
 

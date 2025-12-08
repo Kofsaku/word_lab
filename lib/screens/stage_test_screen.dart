@@ -21,15 +21,17 @@ class StageTestScreen extends StatefulWidget {
 }
 
 class _StageTestScreenState extends State<StageTestScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late List<Map<String, dynamic>> questions;
   int currentIndex = 0;
   int? selectedChoiceIndex;
   List<bool> results = [];
   late AnimationController _animationController;
+  late AnimationController _feedbackController;
   late Animation<double> _fadeAnimation;
   bool showFeedback = false;
   Color? feedbackColor;
+  String feedbackMessage = '';
 
   @override
   void initState() {
@@ -44,7 +46,7 @@ class _StageTestScreenState extends State<StageTestScreen>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -52,19 +54,28 @@ class _StageTestScreenState extends State<StageTestScreen>
       parent: _animationController,
       curve: Curves.easeIn,
     ));
+
+    // フィードバック用アニメーション（チェックタイムと同じ800ms）
+    _feedbackController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
   }
 
   void _generateQuestions() {
     questions = [];
     final words = _getWordsFromCheckTimeResults();
-    
-    // 前半2セット：英→日（3文×2）
+
+    // 前半2セット：英→日（3文×2）- 既存の構成を踏襲
     for (int set = 0; set < 2; set++) {
       for (int q = 0; q < 3; q++) {
         final wordIndex = (set * 3 + q) % words.length;
+        final dialogueData = _generateDialogue(words[wordIndex], widget.userInterest, false);
         questions.add({
           'type': StageTestType.englishToJapanese,
           'sentence': _generateEnglishSentence(words[wordIndex], widget.userInterest),
+          'dialogue': dialogueData['dialogue'],
+          'translation': dialogueData['translation'],
           'targetWord': words[wordIndex],
           'choices': _generateJapaneseChoices(words[wordIndex]),
           'correctAnswer': words[wordIndex].japanese,
@@ -73,14 +84,17 @@ class _StageTestScreenState extends State<StageTestScreen>
         });
       }
     }
-    
-    // 後半2セット：日→英（3文×2）
+
+    // 後半2セット：日→英（3文×2）- ダイアログ形式
     for (int set = 0; set < 2; set++) {
       for (int q = 0; q < 3; q++) {
         final wordIndex = (set * 3 + q) % words.length;
+        final dialogueData = _generateDialogue(words[wordIndex], widget.userInterest, true);
         questions.add({
           'type': StageTestType.japaneseToEnglish,
           'sentence': _generateJapaneseSentence(words[wordIndex], widget.userInterest),
+          'dialogue': dialogueData['dialogue'],
+          'translation': dialogueData['translation'],
           'targetWord': words[wordIndex],
           'choices': _generateEnglishChoices(words[wordIndex]),
           'correctAnswer': words[wordIndex].english,
@@ -98,6 +112,70 @@ class _StageTestScreenState extends State<StageTestScreen>
         .toList();
   }
 
+  // ダイアログ形式のダミーデータを生成（実際はFirebase Functions + GPT API）
+  Map<String, dynamic> _generateDialogue(Word word, String userInterest, bool isJapaneseToEnglish) {
+    // ダミーダイアログデータ（6行の会話形式：A→B→A→B→A→B）
+    final dialogueTemplates = [
+      {
+        'dialogue': [
+          'A: Hello, ${isJapaneseToEnglish ? "(　　　)" : word.english} is my favorite word.',
+          'B: Really? Why do you like ${isJapaneseToEnglish ? "(　　　)" : word.english}?',
+          'A: Because it sounds interesting.',
+          'B: I see. That makes sense.',
+          'A: Yes, ${isJapaneseToEnglish ? "(　　　)" : word.english} is very useful.',
+          'B: I want to learn it too.',
+        ],
+        'translation': [
+          'A: こんにちは、${word.japanese}は私のお気に入りの言葉です。',
+          'B: 本当？なぜ${word.japanese}が好きなの？',
+          'A: 面白く聞こえるからです。',
+          'B: なるほど。それは分かります。',
+          'A: はい、${word.japanese}はとても便利です。',
+          'B: 私も学びたいです。',
+        ],
+      },
+      {
+        'dialogue': [
+          'A: Do you know about ${isJapaneseToEnglish ? "(　　　)" : word.english}?',
+          'B: Yes, I learned it yesterday.',
+          'A: ${isJapaneseToEnglish ? "(　　　)" : word.english} is important for us.',
+          'B: I agree with you.',
+          'A: Let\'s practice ${isJapaneseToEnglish ? "(　　　)" : word.english} together.',
+          'B: That sounds great!',
+        ],
+        'translation': [
+          'A: ${word.japanese}について知っていますか？',
+          'B: はい、昨日学びました。',
+          'A: ${word.japanese}は私たちにとって重要です。',
+          'B: 同意します。',
+          'A: 一緒に${word.japanese}を練習しましょう。',
+          'B: いいですね！',
+        ],
+      },
+      {
+        'dialogue': [
+          'A: I want to learn ${isJapaneseToEnglish ? "(　　　)" : word.english}.',
+          'B: That is a good idea.',
+          'A: ${isJapaneseToEnglish ? "(　　　)" : word.english} will help me.',
+          'B: Yes, it is very useful.',
+          'A: Thank you for your advice.',
+          'B: You are welcome!',
+        ],
+        'translation': [
+          'A: ${word.japanese}を学びたいです。',
+          'B: それは良い考えですね。',
+          'A: ${word.japanese}は私の役に立ちます。',
+          'B: はい、とても便利です。',
+          'A: アドバイスありがとうございます。',
+          'B: どういたしまして！',
+        ],
+      },
+    ];
+
+    final templateIndex = word.english.length % dialogueTemplates.length;
+    return dialogueTemplates[templateIndex];
+  }
+
   String _generateEnglishSentence(Word word, String userInterest) {
     // ダミーGPT生成文章（実際はFirebase Functions + GPT API）
     final templates = [
@@ -105,7 +183,7 @@ class _StageTestScreenState extends State<StageTestScreen>
       'I want to ${word.english} more about ${userInterest.isNotEmpty ? userInterest : "this topic"}.',
       'Learning about ${word.english} helps us understand ${userInterest.isNotEmpty ? userInterest : "the world"}.',
     ];
-    
+
     return templates[word.english.length % templates.length];
   }
 
@@ -116,7 +194,7 @@ class _StageTestScreenState extends State<StageTestScreen>
       '私は${userInterest.isNotEmpty ? userInterest : "このトピック"}について${word.japanese}したいと思います。',
       '${word.japanese}を学ぶことで、${userInterest.isNotEmpty ? userInterest : "世界"}をよりよく理解できます。',
     ];
-    
+
     return templates[word.japanese.length % templates.length];
   }
 
@@ -134,26 +212,27 @@ class _StageTestScreenState extends State<StageTestScreen>
 
   void _handleAnswer(int choiceIndex) {
     if (showFeedback) return;
-    
+
     setState(() => selectedChoiceIndex = choiceIndex);
-    
+
     final question = questions[currentIndex];
     final selectedAnswer = question['choices'][choiceIndex];
     final isCorrect = selectedAnswer == question['correctAnswer'];
-    
+
     results.add(isCorrect);
-    
+
     setState(() {
       showFeedback = true;
       feedbackColor = isCorrect ? AppColors.correct : AppColors.incorrect;
+      feedbackMessage = isCorrect ? '正解' : '不正解';
     });
-    
-    Future.delayed(const Duration(seconds: 1), () {
-      _moveToNext();
-    });
+
+    // フィードバックアニメーションを開始（タップで次へ遷移するので自動遷移は削除）
+    _feedbackController.forward();
   }
 
   void _moveToNext() {
+    _feedbackController.reset();
     if (currentIndex < questions.length - 1) {
       setState(() {
         currentIndex++;
@@ -193,6 +272,7 @@ class _StageTestScreenState extends State<StageTestScreen>
   @override
   void dispose() {
     _animationController.dispose();
+    _feedbackController.dispose();
     super.dispose();
   }
 
@@ -299,10 +379,11 @@ class _StageTestScreenState extends State<StageTestScreen>
 
   Widget _buildQuestionArea() {
     final question = questions[currentIndex];
-    
+    final isJapToEng = question['type'] == StageTestType.japaneseToEnglish;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
@@ -316,16 +397,23 @@ class _StageTestScreenState extends State<StageTestScreen>
       ),
       child: Stack(
         children: [
-          Column(
-            children: [
-              _buildQuestionTypeIndicator(),
-              const SizedBox(height: 30),
-              _buildSentence(),
-              const SizedBox(height: 30),
-              Expanded(child: _buildChoices()),
-            ],
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildQuestionTypeIndicator(),
+                const SizedBox(height: 16),
+                _buildDialogueArea(),
+                const SizedBox(height: 16),
+                _buildChoicesSection(),
+                if (isJapToEng) ...[
+                  const SizedBox(height: 16),
+                  _buildTranslationSection(),
+                ],
+              ],
+            ),
           ),
-          if (showFeedback) _buildFeedbackOverlay(),
+          if (showFeedback) Positioned.fill(child: _buildFeedbackOverlay()),
         ],
       ),
     );
@@ -352,37 +440,61 @@ class _StageTestScreenState extends State<StageTestScreen>
     );
   }
 
-  Widget _buildSentence() {
+  // 6行分のダイアログ表示エリア（ボックス背景なし、左右いっぱい）
+  Widget _buildDialogueArea() {
     final question = questions[currentIndex];
-    final sentence = question['sentence'] as String;
+    final dialogue = question['dialogue'] as List<dynamic>;
+    final isEngToJap = question['type'] == StageTestType.englishToJapanese;
     final targetWord = question['targetWord'] as Word;
-    
-    if (question['type'] == StageTestType.englishToJapanese) {
-      // 英→日：単語を色付き表示
-      return _buildHighlightedSentence(sentence, targetWord.english);
-    } else {
-      // 日→英：通常表示
-      return Text(
-        sentence,
-        style: const TextStyle(
-          fontSize: 20,
-          color: AppColors.textPrimary,
-          height: 1.5,
-        ),
-        textAlign: TextAlign.center,
-      );
-    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...dialogue.map((line) {
+          if (isEngToJap) {
+            // 英→日：ターゲット単語をハイライト
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _buildHighlightedLine(line.toString(), targetWord.english),
+            );
+          } else {
+            // 日→英：空欄表示（既にダイアログに含まれている）
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                line.toString(),
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: AppColors.textPrimary,
+                  height: 1.4,
+                ),
+              ),
+            );
+          }
+        }),
+      ],
+    );
   }
 
-  Widget _buildHighlightedSentence(String sentence, String targetWord) {
-    final parts = sentence.split(targetWord);
-    
+  Widget _buildHighlightedLine(String line, String targetWord) {
+    if (!line.contains(targetWord)) {
+      return Text(
+        line,
+        style: const TextStyle(
+          fontSize: 15,
+          color: AppColors.textPrimary,
+          height: 1.4,
+        ),
+      );
+    }
+
+    final parts = line.split(targetWord);
     return RichText(
       text: TextSpan(
         style: const TextStyle(
-          fontSize: 20,
+          fontSize: 15,
           color: AppColors.textPrimary,
-          height: 1.5,
+          height: 1.4,
         ),
         children: [
           TextSpan(text: parts[0]),
@@ -391,67 +503,154 @@ class _StageTestScreenState extends State<StageTestScreen>
             style: TextStyle(
               color: AppColors.primary,
               fontWeight: FontWeight.bold,
-              backgroundColor: AppColors.primary.withOpacity(0.3),
+              backgroundColor: AppColors.primary.withOpacity(0.2),
             ),
           ),
-          if (parts.length > 1) TextSpan(text: parts[1]),
+          if (parts.length > 1) TextSpan(text: parts.sublist(1).join(targetWord)),
         ],
       ),
-      textAlign: TextAlign.center,
     );
   }
 
-  Widget _buildChoices() {
+  // 選択肢セクション
+  Widget _buildChoicesSection() {
     final question = questions[currentIndex];
     final choices = question['choices'] as List<String>;
-    
-    return Column(
-      children: List.generate(choices.length, (index) {
-        final isSelected = selectedChoiceIndex == index;
-        final isCorrect = showFeedback && choices[index] == question['correctAnswer'];
-        final isWrong = showFeedback && isSelected && !isCorrect;
-        
-        Color backgroundColor = AppColors.background;
-        Color textColor = AppColors.textPrimary;
-        
-        if (showFeedback) {
-          if (isCorrect) {
-            backgroundColor = AppColors.correct;
-            textColor = AppColors.surface;
-          } else if (isWrong) {
-            backgroundColor = AppColors.incorrect;
-            textColor = AppColors.surface;
-          }
-        } else if (isSelected) {
-          backgroundColor = AppColors.primary;
-          textColor = AppColors.surface;
-        }
-        
-        return Container(
-          width: double.infinity,
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ElevatedButton(
-            onPressed: showFeedback ? null : () => _handleAnswer(index),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: backgroundColor,
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: isSelected ? 4 : 1,
-            ),
-            child: Text(
-              choices[index],
-              style: TextStyle(
-                color: textColor,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-              textAlign: TextAlign.center,
-            ),
+    final isJapToEng = question['type'] == StageTestType.japaneseToEnglish;
+
+    // 日→英は2x2グリッド、英→日は縦1列
+    if (isJapToEng) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: _buildChoiceButton(0, choices)),
+              const SizedBox(width: 8),
+              Expanded(child: _buildChoiceButton(1, choices)),
+            ],
           ),
-        );
-      }),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(child: _buildChoiceButton(2, choices)),
+              const SizedBox(width: 8),
+              Expanded(child: _buildChoiceButton(3, choices)),
+            ],
+          ),
+        ],
+      );
+    }
+
+    // 英→日は縦1列表示（横幅いっぱい）
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildChoiceButton(0, choices),
+        const SizedBox(height: 8),
+        _buildChoiceButton(1, choices),
+        const SizedBox(height: 8),
+        _buildChoiceButton(2, choices),
+        const SizedBox(height: 8),
+        _buildChoiceButton(3, choices),
+      ],
+    );
+  }
+
+  Widget _buildChoiceButton(int index, List<String> choices) {
+    if (index >= choices.length) return const SizedBox.shrink();
+
+    final question = questions[currentIndex];
+    final isSelected = selectedChoiceIndex == index;
+    final isCorrect = showFeedback && choices[index] == question['correctAnswer'];
+    final isWrong = showFeedback && isSelected && !isCorrect;
+
+    Color backgroundColor = AppColors.background;
+    Color textColor = AppColors.textPrimary;
+    Color borderColor = AppColors.textPrimary.withOpacity(0.3);
+
+    if (showFeedback) {
+      if (isCorrect) {
+        backgroundColor = AppColors.correct;
+        textColor = AppColors.surface;
+        borderColor = AppColors.correct;
+      } else if (isWrong) {
+        backgroundColor = AppColors.incorrect;
+        textColor = AppColors.surface;
+        borderColor = AppColors.incorrect;
+      }
+    } else if (isSelected) {
+      backgroundColor = AppColors.primary.withOpacity(0.2);
+      borderColor = AppColors.primary;
+    }
+
+    return GestureDetector(
+      onTap: showFeedback ? null : () => _handleAnswer(index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: borderColor, width: 2),
+        ),
+        child: Text(
+          '${index + 1}. ${choices[index]}',
+          style: TextStyle(
+            color: textColor,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  // 日本語訳セクション（日→英問題用）
+  Widget _buildTranslationSection() {
+    final question = questions[currentIndex];
+    final translation = question['translation'] as List<dynamic>;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.correct.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.correct.withOpacity(0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.translate, size: 16, color: AppColors.correct),
+              const SizedBox(width: 4),
+              Text(
+                '日本語訳',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.correct,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ...translation.map((line) => Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text(
+              line.toString(),
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.textPrimary.withOpacity(0.8),
+                height: 1.4,
+              ),
+            ),
+          )),
+        ],
+      ),
     );
   }
 
@@ -518,40 +717,119 @@ class _StageTestScreenState extends State<StageTestScreen>
   }
 
   Widget _buildFeedbackOverlay() {
-    return Container(
-      decoration: BoxDecoration(
-        color: feedbackColor?.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              feedbackColor == AppColors.correct ? Icons.check_circle : Icons.cancel,
-              size: 80,
-              color: AppColors.surface,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              feedbackColor == AppColors.correct ? '正解！' : '不正解...',
-              style: const TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: AppColors.surface,
+    final question = questions[currentIndex];
+    final word = question['targetWord'] as Word;
+    final translation = question['translation'] as List<dynamic>;
+    final isCorrect = feedbackColor == AppColors.correct;
+
+    return GestureDetector(
+      onTap: _moveToNext,
+      child: Container(
+        decoration: BoxDecoration(
+          color: feedbackColor?.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Center(
+          child: ScaleTransition(
+            scale: _feedbackController,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(
+                    isCorrect ? Icons.check_circle : Icons.cancel,
+                    size: 80,
+                    color: AppColors.textPrimary,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    feedbackMessage,
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  // 単語情報（チェックタイムと同様）
+                  Text(
+                    word.english,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    word.japanese,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      color: AppColors.textPrimary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    word.partOfSpeech,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColors.textPrimary.withOpacity(0.7),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  // 全訳表示
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '全訳:',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary.withOpacity(0.8),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        ...translation.map((line) => Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: Text(
+                            line.toString(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textPrimary.withOpacity(0.9),
+                              height: 1.3,
+                            ),
+                          ),
+                        )),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // タップで次へ進むヒント
+                  Text(
+                    'タップして次へ',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textPrimary.withOpacity(0.6),
+                    ),
+                  ),
+                ],
               ),
             ),
-            if (feedbackColor == AppColors.incorrect) ...[
-              const SizedBox(height: 12),
-              Text(
-                '正解: ${questions[currentIndex]['correctAnswer']}',
-                style: const TextStyle(
-                  fontSize: 20,
-                  color: AppColors.surface,
-                ),
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );

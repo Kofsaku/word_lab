@@ -306,7 +306,7 @@ class _InterestInputScreenState extends State<InterestInputScreen>
             maxLines: 4,
             maxLength: 200,
             decoration: InputDecoration(
-              hintText: '例：宇宙探索、料理、スポーツ、映画、音楽、旅行、IT技術、環境問題など...',
+              hintText: '例：宇宙探索、料理、スポーツ、映画、音楽、旅行、IT技術、環境問題、キャラクター名、有名人、映画やドラマ、アニメのタイトルなど...',
               hintStyle: TextStyle(
                 color: AppColors.textPrimary.withOpacity(0.6),
               ),

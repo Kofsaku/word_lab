@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive/rive.dart';
 import '../models/word.dart';
 import '../widgets/handwriting_input.dart';
 import '../theme/app_colors.dart';
@@ -184,24 +185,49 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
   Widget _buildProgressBar(double progress) {
     return Container(
       padding: const EdgeInsets.all(20),
-      child: Column(
+      child: Row(
         children: [
-          Text(
-            'もんだい ${currentIndex + 1} / ${widget.words.length}',
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+          // キャラクター
+          _buildCharacterAnimation(),
+          const SizedBox(width: 16),
+          // 進捗情報
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'もんだい ${currentIndex + 1} / ${widget.words.length}',
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 10,
+                  backgroundColor: AppColors.surface.withOpacity(0.3),
+                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 10),
-          LinearProgressIndicator(
-            value: progress,
-            minHeight: 10,
-            backgroundColor: AppColors.surface.withOpacity(0.3),
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
-          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCharacterAnimation() {
+    return _ContinuousBouncingWidget(
+      child: SizedBox(
+        width: 80,
+        height: 80,
+        child: RiveAnimation.asset(
+          'assets/animations/pikotan_animation.riv',
+          animations: const ['idle', 'walk_L', 'walk_R', 'sleep_A', 'flag_idle'],
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }
@@ -602,6 +628,83 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ContinuousBouncingWidget extends StatefulWidget {
+  final Widget child;
+
+  const _ContinuousBouncingWidget({required this.child});
+
+  @override
+  State<_ContinuousBouncingWidget> createState() => _ContinuousBouncingWidgetState();
+}
+
+class _ContinuousBouncingWidgetState extends State<_ContinuousBouncingWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _floatAnimation;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+
+    _floatAnimation = Tween<double>(
+      begin: -8.0,
+      end: 8.0,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.95,
+      end: 1.05,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+
+    _controller.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _floatAnimation.value),
+          child: Transform.scale(
+            scale: _scaleAnimation.value,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(40),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: Offset(0, _floatAnimation.value * 0.3),
+                  ),
+                ],
+              ),
+              child: widget.child,
+            ),
+          ),
+        );
+      },
     );
   }
 }

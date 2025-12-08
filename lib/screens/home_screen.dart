@@ -283,7 +283,9 @@ class _HomeScreenState extends State<HomeScreen> {
             title: 'トレーニングの続き',
             subtitle: '前回の続きから学習を開始',
             color: AppColors.accent,
-            onTap: () => Navigator.pushNamed(context, '/stage-select'),
+            // TODO: 次フェーズでライトナーロジック実装後、復習対象単語を取得して遷移する
+            // 元のコード: onTap: () => Navigator.pushNamed(context, '/stage-select'),
+            onTap: () => Navigator.pushNamed(context, '/input-training', arguments: 's1'),
             isMain: true,
           ),
           const SizedBox(height: 16),
