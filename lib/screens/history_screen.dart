@@ -80,6 +80,19 @@ class _HistoryScreenState extends State<HistoryScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    
+    // 4技能タブ（インデックス2）への遷移を制限
+    _tabController.addListener(() {
+      if (_tabController.index == 2 && !_tabController.indexIsChanging) {
+        _tabController.index = 1; // 習得単語タブへ強制的に戻す
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('4技能分析機能は現在準備中です。'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+    });
   }
 
   @override
@@ -101,10 +114,24 @@ class _HistoryScreenState extends State<HistoryScreen>
           indicatorColor: AppColors.accent,
           labelColor: AppColors.textPrimary,
           unselectedLabelColor: AppColors.textPrimary.withOpacity(0.6),
-          tabs: const [
+          tabs: [
             Tab(text: 'BOX状況', icon: Icon(Icons.inventory, size: 20)),
             Tab(text: '習得単語', icon: Icon(Icons.library_books, size: 20)),
-            Tab(text: '4技能', icon: Icon(Icons.bar_chart, size: 20)),
+            Tab(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.bar_chart, size: 20, color: AppColors.textPrimary.withOpacity(0.2)),
+                  Text(
+                    '4技能',
+                    style: TextStyle(
+                      fontSize: 14, // 他のタブと合わせる
+                      color: AppColors.textPrimary.withOpacity(0.2),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -117,7 +144,7 @@ class _HistoryScreenState extends State<HistoryScreen>
           children: [
             _buildBoxStatusTab(),
             _buildMasteredWordsTab(),
-            _buildSkillsTab(),
+            _buildComingSoonTab(), // 4技能を準備中画面へ
           ],
         ),
       ),
@@ -1174,6 +1201,40 @@ class _HistoryScreenState extends State<HistoryScreen>
       ),
     );
   }
+
+  Widget _buildComingSoonTab() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.construction,
+            size: 80,
+            color: AppColors.textPrimary.withOpacity(0.2),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'COMING SOON',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary.withOpacity(0.3),
+              letterSpacing: 2,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '4技能分析機能は今後のアップデートで追加予定です',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textPrimary.withOpacity(0.4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showWordDetailDialog(Map<String, dynamic> word) {
     showDialog(
       context: context,
