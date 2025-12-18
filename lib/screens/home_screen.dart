@@ -170,21 +170,26 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 15),
           Row(
             children: [
-              Text(
-                '$percentage',
-                style: const TextStyle(
-                  color: AppColors.warning,
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Text(
-                '%',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w500,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '中1レベルを学習中',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'ぜんぶで $total ステージ',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
               ),
               const Spacer(),
               Column(
@@ -193,15 +198,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     'クリア $completed',
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  Text(
-                    'ぜんぶで $total ステージ',
-                    style: const TextStyle(
-                      fontSize: 14,
                       color: AppColors.textPrimary,
                     ),
                   ),

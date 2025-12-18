@@ -327,8 +327,8 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
   Widget _buildCharacterAnimation() {
     return _ContinuousBouncingWidget(
       child: SizedBox(
-        width: 60,
-        height: 60,
+        width: 100, // 120から100へ微調整
+        height: 100,
         child: RiveAnimation.asset(
           'assets/animations/pikotan_animation.riv',
           animations: const ['idle', 'walk_L', 'walk_R', 'sleep_A', 'flag_idle'],
@@ -358,6 +358,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
           SingleChildScrollView(
             child: Column(
               children: [
+                const SizedBox(height: 50), // 上部にピコタンの活動スペースを確保
                 _buildQuestionTypeIndicator(),
                 const SizedBox(height: 20),
                 _buildQuestionContent(),
@@ -857,46 +858,58 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(
-                feedbackColor == AppColors.correct ? Icons.check_circle : Icons.cancel,
-                size: 80,
-                color: AppColors.textPrimary,
-              ),
-              const SizedBox(height: 16),
+              // メッセージ（正解/不正解）は上部に控えめに
               Text(
                 feedbackMessage,
                 style: const TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              // 単語情報を表示
-              Text(
-                word.english,
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                word.japanese,
-                style: const TextStyle(
                   fontSize: 22,
+                  fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 10),
+              // アイコンも重ならない程度に
+              Icon(
+                feedbackColor == AppColors.correct ? Icons.check_circle : Icons.cancel,
+                size: 60,
+                color: AppColors.textPrimary.withOpacity(0.8),
+              ),
+              const SizedBox(height: 30),
+              // 単語情報を「主役」として巨大化
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Column(
+                  children: [
+                    Text(
+                      word.english,
+                      style: const TextStyle(
+                        fontSize: 40, // 48から40へ調整
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.textPrimary,
+                        letterSpacing: 1.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      word.japanese,
+                      style: const TextStyle(
+                        fontSize: 28, // 36から28へ調整
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
               Text(
                 word.partOfSpeech,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
                   color: AppColors.textPrimary.withOpacity(0.7),
                 ),
                 textAlign: TextAlign.center,

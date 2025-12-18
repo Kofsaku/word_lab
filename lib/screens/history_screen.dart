@@ -103,8 +103,8 @@ class _HistoryScreenState extends State<HistoryScreen>
           unselectedLabelColor: AppColors.textPrimary.withOpacity(0.6),
           tabs: const [
             Tab(text: 'BOX状況', icon: Icon(Icons.inventory, size: 20)),
-            Tab(text: '4技能', icon: Icon(Icons.bar_chart, size: 20)),
             Tab(text: '習得単語', icon: Icon(Icons.library_books, size: 20)),
+            Tab(text: '4技能', icon: Icon(Icons.bar_chart, size: 20)),
           ],
         ),
       ),
@@ -116,8 +116,8 @@ class _HistoryScreenState extends State<HistoryScreen>
           controller: _tabController,
           children: [
             _buildBoxStatusTab(),
-            _buildSkillsTab(),
             _buildMasteredWordsTab(),
+            _buildSkillsTab(),
           ],
         ),
       ),
@@ -226,10 +226,10 @@ class _HistoryScreenState extends State<HistoryScreen>
           const SizedBox(height: 8),
           Text(
             value,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: color,
+              color: AppColors.textPrimary, // 黒系に統一
             ),
           ),
           Text(
@@ -434,7 +434,7 @@ class _HistoryScreenState extends State<HistoryScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'BOX別単語分布',
+            'BOX別単語分布（中1レベル）',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -498,18 +498,18 @@ class _HistoryScreenState extends State<HistoryScreen>
                           Row(
                             children: [
                               Text(
-                                '$count語 ($percentage%)',
-                                style: TextStyle(
+                                '$count語',
+                                style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  color: box['color'],
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                               const SizedBox(width: 8),
                               Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
-                                color: box['color'],
+                                color: AppColors.textPrimary.withOpacity(0.5),
                               ),
                             ],
                           ),
@@ -1082,7 +1082,7 @@ class _HistoryScreenState extends State<HistoryScreen>
             child: Column(
               children: [
                 const Text(
-                  '習得した単語',
+                  '習得した単語（BOX４以上）',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -1091,22 +1091,15 @@ class _HistoryScreenState extends State<HistoryScreen>
                 ),
                 const SizedBox(height: 16),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center, // 中央寄せ
                   children: [
-                    Expanded(
+                    Container(
+                      constraints: const BoxConstraints(minWidth: 160),
                       child: _buildStatCard(
-                        'ワードプラス',
+                        '習得した単語数',
                         '${masteredWords.length}語',
                         Icons.star,
                         AppColors.warning,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildStatCard(
-                        '平均正答率',
-                        '${(masteredWords.map((w) => w['accuracy'] as int).reduce((a, b) => a + b) / masteredWords.length).round()}%',
-                        Icons.analytics,
-                        AppColors.primary,
                       ),
                     ),
                   ],
@@ -1119,31 +1112,31 @@ class _HistoryScreenState extends State<HistoryScreen>
           // 単語リスト
           ...masteredWords.map((word) {
             return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 8), // マージンを詰める
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), // パディングを詰める
               decoration: BoxDecoration(
                 color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: _getAccuracyColor(word['accuracy'] as int).withOpacity(0.2),
+                  color: AppColors.textPrimary.withOpacity(0.1), // 枠線をシンプルに
                   width: 1,
                 ),
               ),
               child: Row(
                 children: [
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
+                      // 横並びにしてコンパクトに
                       children: [
                         Text(
                           word['english'] as String,
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(width: 12),
                         Text(
                           word['japanese'] as String,
                           style: TextStyle(
@@ -1154,45 +1147,20 @@ class _HistoryScreenState extends State<HistoryScreen>
                       ],
                     ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.accent.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          word['category'] as String,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.accent,
-                          ),
-                        ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.accent.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      word['category'] as String,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.accent,
                       ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: _getAccuracyColor(word['accuracy'] as int).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: _getAccuracyColor(word['accuracy'] as int),
-                            width: 1,
-                          ),
-                        ),
-                        child: Text(
-                          '${word['accuracy'] as int}%',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: _getAccuracyColor(word['accuracy'] as int),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),

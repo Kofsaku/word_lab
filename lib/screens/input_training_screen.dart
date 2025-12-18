@@ -464,15 +464,19 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.accent.withOpacity(0.1),
+                              color: const Color(0xFFE1F5FE), // 爽やかな水色
                               borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFFB3E5FC),
+                                width: 1,
+                              ),
                             ),
                             child: Text(
                               words[currentIndex].partOfSpeech,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 16,
-                                color: AppColors.accent,
-                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF0288D1), // 鮮やかな青
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
@@ -645,15 +649,19 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withOpacity(0.1),
+                  color: const Color(0xFFE1F5FE), // 爽やかな水色
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFFB3E5FC),
+                    width: 1,
+                  ),
                 ),
                 child: Text(
                   words[currentIndex].partOfSpeech,
                   style: const TextStyle(
                     fontSize: 18,
-                    color: AppColors.accent,
-                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF0288D1), // 鮮やかな青
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
@@ -1136,7 +1144,7 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
 
   Widget _buildProgress() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 30, top: 10),
       child: Column(
         children: [
           Text(

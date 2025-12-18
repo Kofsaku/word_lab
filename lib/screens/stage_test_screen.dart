@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive/rive.dart';
 import '../models/word.dart';
 import '../theme/app_colors.dart';
 
@@ -66,42 +67,21 @@ class _StageTestScreenState extends State<StageTestScreen>
     questions = [];
     final words = _getWordsFromCheckTimeResults();
 
-    // 前半2セット：英→日（3文×2）- 既存の構成を踏襲
-    for (int set = 0; set < 2; set++) {
-      for (int q = 0; q < 3; q++) {
-        final wordIndex = (set * 3 + q) % words.length;
-        final dialogueData = _generateDialogue(words[wordIndex], widget.userInterest, false);
-        questions.add({
-          'type': StageTestType.englishToJapanese,
-          'sentence': _generateEnglishSentence(words[wordIndex], widget.userInterest),
-          'dialogue': dialogueData['dialogue'],
-          'translation': dialogueData['translation'],
-          'targetWord': words[wordIndex],
-          'choices': _generateJapaneseChoices(words[wordIndex]),
-          'correctAnswer': words[wordIndex].japanese,
-          'setNumber': set + 1,
-          'questionInSet': q + 1,
-        });
-      }
-    }
-
-    // 後半2セット：日→英（3文×2）- ダイアログ形式
-    for (int set = 0; set < 2; set++) {
-      for (int q = 0; q < 3; q++) {
-        final wordIndex = (set * 3 + q) % words.length;
-        final dialogueData = _generateDialogue(words[wordIndex], widget.userInterest, true);
-        questions.add({
-          'type': StageTestType.japaneseToEnglish,
-          'sentence': _generateJapaneseSentence(words[wordIndex], widget.userInterest),
-          'dialogue': dialogueData['dialogue'],
-          'translation': dialogueData['translation'],
-          'targetWord': words[wordIndex],
-          'choices': _generateEnglishChoices(words[wordIndex]),
-          'correctAnswer': words[wordIndex].english,
-          'setNumber': set + 3,
-          'questionInSet': q + 1,
-        });
-      }
+    // 日→英（全6問）に統一（new_req仕様）
+    for (int i = 0; i < 6; i++) {
+      final wordIndex = i % words.length;
+      final dialogueData = _generateDialogue(words[wordIndex], widget.userInterest, true);
+      questions.add({
+        'type': StageTestType.japaneseToEnglish,
+        'sentence': _generateJapaneseSentence(words[wordIndex], widget.userInterest),
+        'dialogue': dialogueData['dialogue'],
+        'translation': dialogueData['translation'],
+        'targetWord': words[wordIndex],
+        'choices': _generateEnglishChoices(words[wordIndex]),
+        'correctAnswer': words[wordIndex].english,
+        'setNumber': 1,
+        'questionInSet': i + 1,
+      });
     }
   }
 
@@ -276,6 +256,23 @@ class _StageTestScreenState extends State<StageTestScreen>
     super.dispose();
   }
 
+  Widget _buildCharacterAnimation() {
+    return _ContinuousBouncingWidget(
+      child: SizedBox(
+        width: 80,
+        height: 80,
+        child: RiveAnimation.asset(
+          'assets/animations/pikotan_animation.riv',
+          animations: const ['idle', 'walk_L', 'walk_R', 'sleep_A', 'flag_idle'],
+          fit: BoxFit.contain,
+          onInit: (artboard) {
+            debugPrint('🎭 Stage Test Rive Animation Loaded');
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -290,7 +287,7 @@ class _StageTestScreenState extends State<StageTestScreen>
               children: [
                 _buildCharacterArea(),
                 Expanded(child: _buildQuestionArea()),
-                _buildProgress(),
+                const SizedBox(height: 10), // 下部マージンを最小限に
               ],
             ),
           ),
@@ -320,58 +317,37 @@ class _StageTestScreenState extends State<StageTestScreen>
       ),
       child: Row(
         children: [
-          // キャラクターエリア（new_req仕様）
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(40),
-              border: Border.all(
-                color: AppColors.primary,
-                width: 3,
-              ),
-            ),
-            child: Icon(
-              Icons.quiz,
-              size: 40,
-              color: AppColors.primary,
-            ),
-          ),
+          // キャラクターエリア（ピコタン - アニメーション版に更新）
+          _buildCharacterAnimation(),
           const SizedBox(width: 16),
+          // 進捗表示をピコタンの横に移動
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'ピコタン',
-                  style: TextStyle(
-                    fontSize: 16,
+                Text(
+                  '${currentIndex + 1}/${questions.length}問',
+                  style: const TextStyle(
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  'セット$setNumber - 問題$questionInSet',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  question['type'] == StageTestType.englishToJapanese
-                      ? '英文の意味を選んでね！'
-                      : '日本語に合う英語を選んでね！',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textPrimary,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: (currentIndex + 1) / questions.length,
+                    backgroundColor: AppColors.textPrimary.withOpacity(0.1),
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.warning),
+                    minHeight: 6,
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 48), // 右上の閉じるボタン等のスペース（必要なら）
         ],
       ),
     );
@@ -401,13 +377,11 @@ class _StageTestScreenState extends State<StageTestScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildQuestionTypeIndicator(),
-                const SizedBox(height: 16),
                 _buildDialogueArea(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8), // 16から8へ短縮
                 _buildChoicesSection(),
                 if (isJapToEng) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8), // 16から8へ短縮
                   _buildTranslationSection(),
                 ],
               ],
@@ -419,26 +393,6 @@ class _StageTestScreenState extends State<StageTestScreen>
     );
   }
 
-  Widget _buildQuestionTypeIndicator() {
-    final question = questions[currentIndex];
-    final isEngToJap = question['type'] == StageTestType.englishToJapanese;
-    
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isEngToJap ? AppColors.accent.withOpacity(0.1) : AppColors.correct.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        isEngToJap ? '英語 → 日本語' : '日本語 → 英語',
-        style: TextStyle(
-          color: AppColors.textPrimary,
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
-        ),
-      ),
-    );
-  }
 
   // 6行分のダイアログ表示エリア（ボックス背景なし、左右いっぱい）
   Widget _buildDialogueArea() {
@@ -460,13 +414,13 @@ class _StageTestScreenState extends State<StageTestScreen>
           } else {
             // 日→英：空欄表示（既にダイアログに含まれている）
             return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: 4), // 8から4へ短縮
               child: Text(
                 line.toString(),
                 style: const TextStyle(
-                  fontSize: 15,
+                  fontSize: 14, // 15から14へ縮小
                   color: AppColors.textPrimary,
-                  height: 1.4,
+                  height: 1.3, // 行高も少し詰める
                 ),
               ),
             );
@@ -654,67 +608,6 @@ class _StageTestScreenState extends State<StageTestScreen>
     );
   }
 
-  Widget _buildProgress() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Text(
-            '${currentIndex + 1}/${questions.length}問',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 8),
-          LinearProgressIndicator(
-            value: (currentIndex + 1) / questions.length,
-            backgroundColor: AppColors.surface.withOpacity(0.3),
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.warning),
-            minHeight: 8,
-          ),
-          const SizedBox(height: 12),
-          _buildSetIndicator(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSetIndicator() {
-    final question = questions[currentIndex];
-    final setNumber = question['setNumber'];
-    final questionInSet = question['questionInSet'];
-    
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppColors.surface.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            'セット$setNumber',
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Text(
-          '$questionInSet/3問',
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 14,
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildFeedbackOverlay() {
     final question = questions[currentIndex];
@@ -738,40 +631,51 @@ class _StageTestScreenState extends State<StageTestScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(
-                    isCorrect ? Icons.check_circle : Icons.cancel,
-                    size: 80,
-                    color: AppColors.textPrimary,
-                  ),
-                  const SizedBox(height: 16),
+                  // メッセージ（正解/不正解）は上部に控えめに
                   Text(
                     feedbackMessage,
                     style: const TextStyle(
-                      fontSize: 32,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
                     ),
                     textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  // アイコン
+                  Icon(
+                    isCorrect ? Icons.check_circle : Icons.cancel,
+                    size: 60,
+                    color: AppColors.textPrimary.withOpacity(0.8),
                   ),
                   const SizedBox(height: 20),
-                  // 単語情報（チェックタイムと同様）
-                  Text(
-                    word.english,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                  // 単語情報を「主役」として巨大化
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: Column(
+                      children: [
+                        Text(
+                          word.english,
+                          style: const TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.textPrimary,
+                            letterSpacing: 1.5,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          word.japanese,
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    word.japanese,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      color: AppColors.textPrimary,
-                    ),
-                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -835,4 +739,69 @@ class _StageTestScreenState extends State<StageTestScreen>
     );
   }
 
+}
+
+class _ContinuousBouncingWidget extends StatefulWidget {
+  final Widget child;
+
+  const _ContinuousBouncingWidget({required this.child});
+
+  @override
+  State<_ContinuousBouncingWidget> createState() => _ContinuousBouncingWidgetState();
+}
+
+class _ContinuousBouncingWidgetState extends State<_ContinuousBouncingWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _floatAnimation;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+
+    _floatAnimation = Tween<double>(
+      begin: -4.0,
+      end: 4.0,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.98,
+      end: 1.02,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+
+    _controller.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _floatAnimation.value),
+          child: Transform.scale(
+            scale: _scaleAnimation.value,
+            child: widget.child,
+          ),
+        );
+      },
+    );
+  }
 }
