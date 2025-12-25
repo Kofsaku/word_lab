@@ -16,7 +16,26 @@ class HandwritingRecognitionService {
     
     try {
       // 英語用デジタルインク認識器を初期化
-      _recognizer = mlkit.DigitalInkRecognizer(languageCode: 'en');
+      const String languageCode = 'en';
+      
+      // モデルマネージャーでモデルのダウンロード状態を確認
+      final modelManager = mlkit.DigitalInkRecognizerModelManager();
+      final isDownloaded = await modelManager.isModelDownloaded(languageCode);
+      
+      if (!isDownloaded) {
+        print('📥 Downloading ML Kit model for language: $languageCode');
+        final downloadSuccess = await modelManager.downloadModel(languageCode);
+        if (downloadSuccess) {
+          print('✅ Model downloaded successfully');
+        } else {
+          print('❌ Model download failed');
+          return;
+        }
+      } else {
+        print('✅ Model already downloaded');
+      }
+      
+      _recognizer = mlkit.DigitalInkRecognizer(languageCode: languageCode);
       _isInitialized = true;
       print('Handwriting recognition service initialized');
     } catch (e) {
@@ -35,29 +54,55 @@ class HandwritingRecognitionService {
       // ストロークをDigitalInk形式に変換
       final ink = mlkit.Ink();
       
-      for (int i = 0; i < strokes.length; i++) {
-        final stroke = strokes[i];
+      // 基準タイムスタンプ
+      int baseTime = DateTime.now().millisecondsSinceEpoch;
+      
+      // デバッグログ
+      print('📝 Handwriting Recognition Debug:');
+      print('   Total strokes: ${strokes.length}');
+      
+      for (int strokeIndex = 0; strokeIndex < strokes.length; strokeIndex++) {
+        final stroke = strokes[strokeIndex];
+        print('   Stroke $strokeIndex: ${stroke.length} points');
+        
         if (stroke.length > 1) {
-          final points = stroke.map((offset) => 
-            mlkit.StrokePoint(x: offset.dx, y: offset.dy, t: DateTime.now().millisecondsSinceEpoch + i)
-          ).toList();
-          
           final mlkitStroke = mlkit.Stroke();
-          mlkitStroke.points.addAll(points);
+          
+          for (int pointIndex = 0; pointIndex < stroke.length; pointIndex++) {
+            final offset = stroke[pointIndex];
+            // 各ポイントに10ms間隔でタイムスタンプを付与
+            // ストローク間には100ms（文字分離のため）
+            final timestamp = baseTime + (strokeIndex * 100) + (pointIndex * 10);
+            
+            mlkitStroke.points.add(
+              mlkit.StrokePoint(x: offset.dx, y: offset.dy, t: timestamp)
+            );
+          }
+          
           ink.strokes.add(mlkitStroke);
         }
       }
+      
+      print('   Ink strokes added: ${ink.strokes.length}');
 
       // 認識実行
       final candidates = await _recognizer.recognize(ink);
       
-      if (candidates.isNotEmpty) {
-        return candidates.first.text;
+      print('   Candidates count: ${candidates.length}');
+      for (int i = 0; i < candidates.length && i < 5; i++) {
+        print('   Candidate $i: "${candidates[i].text}" (score: ${candidates[i].score})');
       }
       
+      if (candidates.isNotEmpty) {
+        final result = candidates.first.text;
+        print('✅ Recognized result: "$result"');
+        return result;
+      }
+      
+      print('⚠️ No candidates returned');
       return '';
     } catch (e) {
-      print('Error during recognition: $e');
+      print('❌ Error during recognition: $e');
       // フォールバック：ダミー認識
       return _fallbackRecognition(strokes);
     }
@@ -122,15 +167,24 @@ class HandwritingRecognitionService {
     try {
       final ink = mlkit.Ink();
       
-      for (int i = 0; i < strokes.length; i++) {
-        final stroke = strokes[i];
+      // 基準タイムスタンプ
+      int baseTime = DateTime.now().millisecondsSinceEpoch;
+      
+      for (int strokeIndex = 0; strokeIndex < strokes.length; strokeIndex++) {
+        final stroke = strokes[strokeIndex];
         if (stroke.length > 1) {
-          final points = stroke.map((offset) => 
-            mlkit.StrokePoint(x: offset.dx, y: offset.dy, t: DateTime.now().millisecondsSinceEpoch + i)
-          ).toList();
-          
           final mlkitStroke = mlkit.Stroke();
-          mlkitStroke.points.addAll(points);
+          
+          for (int pointIndex = 0; pointIndex < stroke.length; pointIndex++) {
+            final offset = stroke[pointIndex];
+            // 各ポイントに10ms間隔でタイムスタンプを付与
+            final timestamp = baseTime + (strokeIndex * 100) + (pointIndex * 10);
+            
+            mlkitStroke.points.add(
+              mlkit.StrokePoint(x: offset.dx, y: offset.dy, t: timestamp)
+            );
+          }
+          
           ink.strokes.add(mlkitStroke);
         }
       }

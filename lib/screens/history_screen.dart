@@ -439,9 +439,76 @@ class _HistoryScreenState extends State<HistoryScreen>
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
+          _buildOverallProgress(),
+          const SizedBox(height: 20),
           _buildBoxDistribution(),
           const SizedBox(height: 20),
           _buildBoxExplanation(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOverallProgress() {
+    // ホーム画面と共通の進捗計算（ダミー）
+    const progress = 0.45; 
+    const percentage = (progress * 100);
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                '学習の進み具合',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Text(
+                '${percentage.toInt()}%',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.warning,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 12,
+              backgroundColor: AppColors.divider,
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.warning),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '中1レベル 全10ステージ中 4ステージ完了',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textPrimary.withOpacity(0.6),
+            ),
+          ),
         ],
       ),
     );

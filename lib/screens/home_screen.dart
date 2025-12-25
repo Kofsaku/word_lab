@@ -130,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildProgressCard(int completed, int total) {
-    final progress = total > 0 ? completed / total : 0.0;
+    const progress = 0.45;
     final percentage = (progress * 100).toInt();
 
     return Container(
@@ -182,9 +182,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    'ぜんぶで $total ステージ',
-                    style: const TextStyle(
+                  const Text(
+                    'ぜんぶで 10 ステージ',
+                    style: TextStyle(
                       fontSize: 14,
                       color: AppColors.textPrimary,
                     ),
@@ -195,9 +195,9 @@ class _HomeScreenState extends State<HomeScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    'クリア $completed',
-                    style: const TextStyle(
+                  const Text(
+                    'クリア 4',
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -224,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Positioned.fill(
                 child: Center(
                   child: Text(
-                    percentage >= 50 ? 'すごい！' : 'がんばれ！',
+                    '$percentage% ${percentage >= 50 ? 'すごい！' : 'がんばれ！'}',
                     style: const TextStyle(
                       color: AppColors.textOnPrimary,
                       fontSize: 12,

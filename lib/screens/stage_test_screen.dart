@@ -257,18 +257,17 @@ class _StageTestScreenState extends State<StageTestScreen>
   }
 
   Widget _buildCharacterAnimation() {
-    return _ContinuousBouncingWidget(
-      child: SizedBox(
-        width: 80,
-        height: 80,
-        child: RiveAnimation.asset(
-          'assets/animations/pikotan_animation.riv',
-          animations: const ['idle', 'walk_L', 'walk_R', 'sleep_A', 'flag_idle'],
-          fit: BoxFit.contain,
-          onInit: (artboard) {
-            debugPrint('🎭 Stage Test Rive Animation Loaded');
-          },
-        ),
+    // 寝そべったキャラクター（横長の形状）
+    return SizedBox(
+      width: 240,  // 横長
+      height: 85,  // 縦
+      child: RiveAnimation.asset(
+        'assets/animations/pikotan_animation.riv',
+        animations: const ['sleep_A'],  // 寝そべりアニメーション
+        fit: BoxFit.contain,
+        onInit: (artboard) {
+          debugPrint('🎭 Stage Test Rive Animation Loaded (sleeping)');
+        },
       ),
     );
   }
@@ -285,9 +284,9 @@ class _StageTestScreenState extends State<StageTestScreen>
             opacity: _fadeAnimation,
             child: Column(
               children: [
-                _buildCharacterArea(),
+                _buildHeader(),
                 Expanded(child: _buildQuestionArea()),
-                const SizedBox(height: 10), // 下部マージンを最小限に
+                const SizedBox(height: 10),
               ],
             ),
           ),
@@ -296,58 +295,50 @@ class _StageTestScreenState extends State<StageTestScreen>
     );
   }
 
-  Widget _buildCharacterArea() {
-    final question = questions[currentIndex];
-    final setNumber = question['setNumber'];
-    final questionInSet = question['questionInSet'];
-    
+  Widget _buildHeader() {
     return Container(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.textPrimary.withOpacity(0.1),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      child: Column(
         children: [
-          // キャラクターエリア（ピコタン - アニメーション版に更新）
-          _buildCharacterAnimation(),
-          const SizedBox(width: 16),
-          // 進捗表示をピコタンの横に移動
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '${currentIndex + 1}/${questions.length}問',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
+          // 上段: 閉じるボタン、タイトル、進捗
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              // 左側の閉じるボタン
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close, color: AppColors.textPrimary, size: 28),
                 ),
-                const SizedBox(height: 4),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: (currentIndex + 1) / questions.length,
-                    backgroundColor: AppColors.textPrimary.withOpacity(0.1),
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.warning),
-                    minHeight: 6,
+              ),
+              // 中央のタイトルと進捗
+              Column(
+                children: [
+                  const Text(
+                    'ステージクリアテスト',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                  Text(
+                    '${currentIndex + 1}/${questions.length}問',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          const SizedBox(width: 48), // 右上の閉じるボタン等のスペース（必要なら）
+          // キャラクター（「1/6問」と出題スペースの間に横長で配置）
+          Transform.translate(
+            offset: const Offset(0, -20),  // 上に20pxずらす
+            child: _buildCharacterAnimation(),
+          ),
         ],
       ),
     );
@@ -357,8 +348,10 @@ class _StageTestScreenState extends State<StageTestScreen>
     final question = questions[currentIndex];
     final isJapToEng = question['type'] == StageTestType.japaneseToEnglish;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
+    return Transform.translate(
+      offset: const Offset(0, -20),  // 上に20pxずらす
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -389,6 +382,7 @@ class _StageTestScreenState extends State<StageTestScreen>
           ),
           if (showFeedback) Positioned.fill(child: _buildFeedbackOverlay()),
         ],
+      ),
       ),
     );
   }

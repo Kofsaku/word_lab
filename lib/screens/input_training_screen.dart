@@ -380,17 +380,17 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
             // 説明テキスト
             _buildInstructionText(),
             
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
             
             // キャラクターとカードスタックの横並び表示
             _buildCharacterAndStackRow(),
             
-            const Spacer(),
+            const Spacer(flex: 2), // ここでカードを下に押し下げる
             
-            // 例文表示
+            // 例文表示（カード本体）
             _buildExampleSection(),
             
-            const SizedBox(height: 40),
+            const Spacer(flex: 1), // 下部にも少し余白を設けてバランスを取る
           ],
         ),
         
@@ -496,7 +496,7 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
   Widget _buildCardStack() {
     return SizedBox(
       width: 120,
-      height: 220, // Height for 6 non-overlapping cards (6 * 32 + 28 = 220)
+      height: 160, // 220 -> 160
       child: Stack(
         children: List.generate(
           6, // Show all 6 possible card positions
@@ -506,7 +506,7 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
             final isLatest = hasCard && index == stackedCards.length - 1;
             
             return Positioned(
-              bottom: index * 32.0, // No overlap - full card height + gap
+              bottom: index * 24.0, // 32.0 -> 24.0
               right: 0,
               child: AnimatedBuilder(
                 animation: _stackAnimationController,
@@ -630,7 +630,7 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
     return Column(
       children: [
         _buildSwipeableCard(),
-        const SizedBox(height: 20),
+        const SizedBox(height: 10), // 20 -> 10
         AnimatedOpacity(
           opacity: _showMeaning ? 1.0 : 0.0,
           duration: const Duration(milliseconds: 500),
@@ -668,14 +668,6 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        Text(
-          'カードを左右にスワイプしてください',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.black87,
-          ),
-        ),
       ],
     );
   }
@@ -696,7 +688,7 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
                 offset: _trailOffsets[index],
                 child: Container(
                   width: 300,
-                  height: 180,
+                  height: 150, // 180 -> 150
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
                     color: Colors.white, // HTML var(--card)
@@ -719,7 +711,7 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
             offset: Offset(_dragOffset, 0),
             child: Container(
             width: 300,
-            height: 180,
+            height: 150, // 180 -> 150
             margin: const EdgeInsets.symmetric(horizontal: 20),
             decoration: BoxDecoration(
               color: _getCardColor(),
@@ -1147,6 +1139,14 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
       padding: const EdgeInsets.only(left: 20, right: 20, bottom: 30, top: 10),
       child: Column(
         children: [
+          const Text(
+            'カードを左右にスワイプしてください',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.black54, // 少し薄くして控えめに
+            ),
+          ),
+          const SizedBox(height: 12),
           Text(
             '${currentIndex.clamp(0, words.length)}/${words.length}語',
             style: const TextStyle(

@@ -135,8 +135,15 @@ class _HandwritingInputState extends State<HandwritingInput> {
     if (strokes.isNotEmpty) {
       setState(() {
         strokes.removeLast();
+        recognizedText = ''; // 認識結果もリセット
       });
-      _scheduleRecognition();
+      
+      // ストロークが残っている場合は再認識、空の場合は空文字を通知
+      if (strokes.isNotEmpty) {
+        _scheduleRecognition();
+      } else {
+        widget.onTextChanged('');
+      }
     }
   }
 
@@ -244,47 +251,37 @@ class _HandwritingInputState extends State<HandwritingInput> {
           ),
         ),
         
-        const SizedBox(height: 8),
-        
-        // 認識結果表示（コンパクト版）
-        if (recognizedText.isNotEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.green.shade50,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.green.shade200),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.text_fields, color: Colors.green, size: 16),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    recognizedText,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
         
         const SizedBox(height: 8),
         
-        // シンプルな操作ボタン
+        // 操作ボタン（キーボード + 1画消去 + 全消去）
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildSimpleButton(
-              icon: Icons.backspace,
-              label: '削除',
+            // キーボードボタン（テキスト付き）
+            if (widget.onSwitchToKeyboard != null)
+              _buildTextButton(
+                icon: Icons.keyboard,
+                label: 'キーボード',
+                color: Colors.blue,
+                onPressed: widget.onSwitchToKeyboard!,
+              ),
+            if (widget.onSwitchToKeyboard != null)
+              const SizedBox(width: 12),
+            // 1画消去（アイコンのみ）
+            _buildIconButton(
+              icon: Icons.undo,
+              color: Colors.orange,
+              onPressed: _undo,
+              tooltip: '1画消去',
+            ),
+            const SizedBox(width: 8),
+            // 全消去（アイコンのみ）
+            _buildIconButton(
+              icon: Icons.delete_outline,
               color: Colors.red,
               onPressed: _clear,
+              tooltip: '全消去',
             ),
           ],
         ),
@@ -292,7 +289,8 @@ class _HandwritingInputState extends State<HandwritingInput> {
     );
   }
 
-  Widget _buildSimpleButton({
+  // テキスト付きボタン
+  Widget _buildTextButton({
     required IconData icon,
     required String label,
     required Color color,
@@ -316,6 +314,30 @@ class _HandwritingInputState extends State<HandwritingInput> {
           borderRadius: BorderRadius.circular(20),
         ),
         elevation: 0,
+      ),
+    );
+  }
+
+  // アイコンのみボタン
+  Widget _buildIconButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+    String? tooltip,
+  }) {
+    return Tooltip(
+      message: tooltip ?? '',
+      child: Material(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            child: Icon(icon, size: 22, color: color),
+          ),
+        ),
       ),
     );
   }

@@ -339,37 +339,49 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
   }
 
   Widget _buildQuestionArea() {
-    return Container(
-      margin: const EdgeInsets.all(15),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 利用可能な高さから他の要素の高さを引いて手書きエリアの高さを計算
+        // 他の要素：問題タイプ(40)+問題内容(100)+カードボックス(70)+ボタン類(100)+余白(30)=340px
+        final availableHeight = constraints.maxHeight - 340;
+        final handwritingHeight = availableHeight.clamp(120.0, 350.0);
+        
+        return Container(
+          margin: const EdgeInsets.all(15),
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 50), // 上部にピコタンの活動スペースを確保
-                _buildQuestionTypeIndicator(),
-                const SizedBox(height: 20),
-                _buildQuestionContent(),
-                const SizedBox(height: 25),
-                _buildAnswerSection(),
-              ],
-            ),
+          child: Stack(
+            children: [
+              SingleChildScrollView(
+                physics: isHandwritingMode 
+                    ? const NeverScrollableScrollPhysics() 
+                    : const BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    _buildQuestionTypeIndicator(),
+                    const SizedBox(height: 10),
+                    _buildQuestionContent(),
+                    const SizedBox(height: 10),
+                    _buildAnswerSectionWithHeight(handwritingHeight),
+                  ],
+                ),
+              ),
+              if (showFeedback) Positioned.fill(child: _buildFeedbackOverlay()),
+            ],
           ),
-          if (showFeedback) Positioned.fill(child: _buildFeedbackOverlay()),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -453,6 +465,14 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
     }
   }
 
+  Widget _buildAnswerSectionWithHeight(double handwritingHeight) {
+    if (currentQuestionType == QuestionType.englishToJapanese) {
+      return _buildChoiceButtons();
+    } else {
+      return _buildInputSectionWithHeight(handwritingHeight);
+    }
+  }
+
   Widget _buildChoiceButtons() {
     final question = questions[currentIndex];
     final choices = question['choices'] as List<String>;
@@ -502,6 +522,41 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
         Container(
           child: isHandwritingMode 
               ? _buildHandwritingArea()
+              : _buildKeyboardInput(),
+        ),
+        
+        // 認識候補表示（手書きモード時のみ）
+        if (isHandwritingMode && recognitionCandidates.isNotEmpty)
+          Container(
+            margin: const EdgeInsets.only(top: 10),
+            child: RecognitionCandidates(
+              candidates: recognitionCandidates,
+              selectedText: selectedCandidate,
+              onCandidateSelected: (candidate) {
+                setState(() {
+                  selectedCandidate = candidate;
+                  _textController.text = candidate;
+                });
+              },
+            ),
+          ),
+        
+        const SizedBox(height: 15),
+        _buildInputModeToggle(),
+      ],
+    );
+  }
+
+  Widget _buildInputSectionWithHeight(double handwritingHeight) {
+    return Column(
+      children: [
+        _buildCardBox(),
+        const SizedBox(height: 15),
+        
+        // 入力エリア（動的高さ）
+        Container(
+          child: isHandwritingMode 
+              ? _buildHandwritingAreaWithHeight(handwritingHeight)
               : _buildKeyboardInput(),
         ),
         
@@ -577,7 +632,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
 
   Widget _buildHandwritingArea() {
     return SizedBox(
-      height: 200,
+      height: (MediaQuery.of(context).size.height * 0.32).clamp(140.0, 350.0),
       child: HandwritingInput(
         currentQuestion: 'question_${currentIndex}', // 問題変更検知用
         onTextChanged: (text) {
@@ -614,6 +669,58 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
             });
           });
         },
+        onSwitchToKeyboard: () {
+          setState(() {
+            isHandwritingMode = false;
+          });
+        },
+      ),
+    );
+  }
+
+  Widget _buildHandwritingAreaWithHeight(double height) {
+    return SizedBox(
+      height: height,
+      child: HandwritingInput(
+        currentQuestion: 'question_${currentIndex}',
+        onTextChanged: (text) {
+          Future.microtask(() {
+            setState(() {
+              _textController.text = text;
+            });
+            
+            if (text.isNotEmpty) {
+              _recognitionService.recognizeWithCandidates(
+                [],
+                maxCandidates: 3,
+              ).then((candidates) {
+                if (mounted) {
+                  setState(() {
+                    recognitionCandidates = candidates;
+                  });
+                }
+              }).catchError((e) {
+                print('Recognition candidates error: $e');
+              });
+            } else {
+              setState(() {
+                recognitionCandidates = [];
+              });
+            }
+          });
+        },
+        onClear: () {
+          Future.microtask(() {
+            setState(() {
+              _textController.clear();
+            });
+          });
+        },
+        onSwitchToKeyboard: () {
+          setState(() {
+            isHandwritingMode = false;
+          });
+        },
       ),
     );
   }
@@ -641,71 +748,62 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
   }
 
   Widget _buildInputModeToggle() {
+    // 手書きモード時はhandwriting_input内にボタンがあるため非表示
+    if (isHandwritingMode) {
+      return const SizedBox.shrink();
+    }
+    
+    // キーボードモード時のみ表示
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        // 手書きモードへの切り替えボタン（テキスト付き、枠線なし）
         GestureDetector(
-          onTap: () => setState(() => isHandwritingMode = !isHandwritingMode),
+          onTap: () => setState(() => isHandwritingMode = true),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.blue.shade100,
+              color: Colors.blue.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Colors.blue.shade300,
-                width: 1,
-              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  isHandwritingMode ? Icons.keyboard : Icons.draw,
-                  color: Colors.blue.shade700,
-                  size: 20,
+                  Icons.draw,
+                  color: Colors.blue,
+                  size: 18,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  isHandwritingMode ? 'キーボード' : '手書き',
+                  '手書き',
                   style: TextStyle(
-                    color: Colors.blue.shade700,
-                    fontWeight: FontWeight.w600,
+                    color: Colors.blue,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
                   ),
                 ),
               ],
             ),
           ),
         ),
-        const SizedBox(width: 16),
-        GestureDetector(
-          onTap: _handleDeleteChar,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.red.shade100,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Colors.red.shade300,
-                width: 1,
+        const SizedBox(width: 12),
+        // 1文字消去ボタン（アイコンのみ、枠線なし）
+        Tooltip(
+          message: '1文字消去',
+          child: GestureDetector(
+            onTap: _handleDeleteChar,
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
               ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.backspace,
-                  color: Colors.red.shade700,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '１文字消去',
-                  style: TextStyle(
-                    color: Colors.red.shade700,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+              child: Icon(
+                Icons.backspace,
+                color: Colors.red,
+                size: 22,
+              ),
             ),
           ),
         ),

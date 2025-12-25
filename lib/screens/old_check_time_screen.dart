@@ -156,9 +156,12 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
             _buildProgressBar(progress),
             Expanded(
               child: SingleChildScrollView(
+                physics: isHandwritingMode 
+                    ? const NeverScrollableScrollPhysics() 
+                    : const BouncingScrollPhysics(),
                 child: Column(
                   children: [
-                    const SizedBox(height: 20),
+                    // const SizedBox(height: 4), // Removed
                     AnimatedBuilder(
                       animation: _shakeAnimation,
                       builder: (context, child) {
@@ -168,7 +171,7 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
                         );
                       },
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 10), // 30 -> 10
                   ],
                 ),
               ),
@@ -184,7 +187,7 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
 
   Widget _buildProgressBar(double progress) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2), // 10 -> 2
       child: Row(
         children: [
           // キャラクター
@@ -235,7 +238,7 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
   Widget _buildQuestionCard(Word word) {
     return Container(
       width: MediaQuery.of(context).size.width * 0.9,
-      padding: const EdgeInsets.all(30),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12), // all(20) -> vertical:12
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(30),
@@ -259,33 +262,33 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
               color: AppColors.accent.withOpacity(0.3),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Text(
-              word.partOfSpeech,
-              style: const TextStyle(
+            child: const Text(
+              '日本語 → 英語',
+              style: TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 16), // 30 -> 16
           Text(
             word.japanese,
             style: const TextStyle(
-              fontSize: 36,
+              fontSize: 32, // 36 -> 32
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
-            'えいごでなんていう？',
-            style: const TextStyle(
-              fontSize: 16,
-              color: AppColors.textPrimary,
+            word.partOfSpeech,
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textPrimary.withOpacity(0.6),
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 20), // 40 -> 20
           _buildInputField(word),
           if (feedbackMessage != null) ...[
             const SizedBox(height: 20),
@@ -341,8 +344,8 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
           children: List.generate(letterCount, (index) {
             final hasLetter = _controller.text.length > index;
             return Container(
-              width: 42,
-              height: 52,
+              width: 38, // 42 -> 38
+              height: 46, // 52 -> 46
               margin: const EdgeInsets.symmetric(horizontal: 3),
               decoration: BoxDecoration(
                 color: hasLetter ? AppColors.warning.withOpacity(0.6) : AppColors.surface.withOpacity(0.6),
@@ -423,7 +426,7 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
                 ),
               ),
               SizedBox(
-                height: 200,
+                height: (MediaQuery.of(context).size.height * 0.32).clamp(140.0, 350.0),
                 child: HandwritingInput(
                   onTextChanged: (text) {
                     Future.microtask(() {
