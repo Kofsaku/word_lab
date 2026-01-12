@@ -263,19 +263,39 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.background,
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(),
-              Expanded(child: _buildQuestionArea()),
-              _buildBottomActions(),
-            ],
-          ),
-        ),
+      resizeToAvoidBottomInset: false, // キーボード表示時にリサイズしない（自分でスクロール制御）
+      body: Builder(
+        builder: (context) {
+          // 画面全体の高さ（キーボード関係なく固定）
+          final screenHeight = MediaQuery.of(context).size.height;
+          final topPadding = MediaQuery.of(context).padding.top;
+          final bottomPadding = MediaQuery.of(context).padding.bottom;
+          final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+          
+          // コンテンツの固定高さ（キーボードが出ていない時の利用可能高さ）
+          final contentHeight = screenHeight - topPadding - bottomPadding;
+          
+          return SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: keyboardHeight), // キーボード分の下余白を追加してスクロール可能に
+              child: Container(
+                height: contentHeight,
+                decoration: const BoxDecoration(
+                  color: AppColors.background,
+                ),
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      _buildHeader(),
+                      Expanded(child: _buildQuestionArea()),
+                      _buildBottomActions(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
