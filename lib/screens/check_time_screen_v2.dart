@@ -606,11 +606,11 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
               height: 50,
               margin: const EdgeInsets.symmetric(horizontal: 2),
               decoration: BoxDecoration(
-                color: hasChar ? AppColors.accent.withOpacity(0.3) : AppColors.surface.withOpacity(0.6),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: hasChar ? AppColors.accent.withOpacity(0.6) : AppColors.textPrimary.withOpacity(0.3),
-                  width: 2,
+                border: Border(
+                  bottom: BorderSide(
+                    color: hasChar ? AppColors.accent : AppColors.textPrimary.withOpacity(0.3),
+                    width: 2,
+                  ),
                 ),
               ),
               child: Center(
