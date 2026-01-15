@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
+import 'package:flutter/services.dart'; // rootBundle用
 import '../models/word.dart';
 import '../widgets/handwriting_input.dart';
 import '../widgets/recognition_candidates.dart';
@@ -45,8 +46,12 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
       HandwritingRecognitionService.instance;
   
   // リアルタイム認識用
+  // リアルタイム認識用
   List<String> recognitionCandidates = [];
   String? selectedCandidate;
+
+  // Character Widget Key
+  final GlobalKey<CharacterWidgetState> _characterKey = GlobalKey<CharacterWidgetState>();
 
   @override
   void initState() {
@@ -150,6 +155,13 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
   }
 
   void _showAnswerFeedback(bool isCorrect) {
+    // Riveアニメーション発火
+    if (isCorrect) {
+      _characterKey.currentState?.playCorrect();
+    } else {
+      _characterKey.currentState?.playIncorrect();
+    }
+
     setState(() {
       feedbackMessage = isCorrect ? '正解' : '不正解';
       feedbackColor = isCorrect ? AppColors.correct : AppColors.incorrect;
@@ -240,6 +252,9 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
       _audioService.playWordAudio(question['word'].english);
     }
 
+    // 不正解アニメーション（降参時もバツを表示）
+    _characterKey.currentState?.playIncorrect();
+
     setState(() {
       feedbackMessage = '正解は...';
       feedbackColor = AppColors.warning;
@@ -287,6 +302,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
                   child: Column(
                     children: [
                       _buildHeader(),
+                      _buildCharacterSection(),
                       Expanded(child: _buildQuestionArea()),
                       _buildBottomActions(),
                     ],
@@ -302,7 +318,7 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -334,10 +350,54 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
               ),
             ],
           ),
-          // 右側のキャラクター
-          Align(
-            alignment: Alignment.centerRight,
-            child: _buildCharacterAnimation(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCharacterSection() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // キャラクター
+           _buildCharacterAnimation(),
+          
+          const SizedBox(width: 10),
+          
+          // 吹き出し
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                  bottomLeft: Radius.zero, // 吹き出しのしっぽっぽく
+                ),
+                border: Border.all(color: Colors.grey.shade300, width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Text(
+                'わからない単語は\n降参するのも勇気！', // ダミーテキスト
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                  height: 1.4,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -345,18 +405,10 @@ class _CheckTimeScreenV2State extends State<CheckTimeScreenV2>
   }
 
   Widget _buildCharacterAnimation() {
-    return _ContinuousBouncingWidget(
-      child: SizedBox(
-        width: 100, // 120から100へ微調整
-        height: 100,
-        child: RiveAnimation.asset(
-          'assets/animations/pikotan_animation.riv',
-          animations: const ['idle', 'walk_L', 'walk_R', 'sleep_A', 'flag_idle'],
-          fit: BoxFit.contain,
-        ),
-      ),
-    );
+    return CharacterWidget(key: _characterKey);
   }
+
+  // _onRiveInitは不要になったので削除
 
   Widget _buildQuestionArea() {
     return LayoutBuilder(
@@ -1132,6 +1184,81 @@ class _ContinuousBouncingWidgetState extends State<_ContinuousBouncingWidget>
           ),
         );
       },
+    );
+  }
+}
+
+class CharacterWidget extends StatefulWidget {
+  const CharacterWidget({super.key});
+
+  @override
+  State<CharacterWidget> createState() => CharacterWidgetState();
+}
+
+class CharacterWidgetState extends State<CharacterWidget>
+    with AutomaticKeepAliveClientMixin {
+  SMITrigger? _correctTrigger;
+  SMITrigger? _incorrectTrigger;
+  RiveFile? _riveFile;
+  Widget? _cachedRiveWidget;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _preloadRiveFile();
+  }
+
+  Future<void> _preloadRiveFile() async {
+    try {
+      final data = await rootBundle.load('assets/animations/pikotan_animation.riv');
+      final file = RiveFile.import(data);
+      if (mounted) {
+        setState(() {
+          _riveFile = file;
+          _cachedRiveWidget = RiveAnimation.direct(
+            file,
+            fit: BoxFit.contain,
+            onInit: _onRiveInit,
+          );
+        });
+      }
+    } catch (e) {
+      print('Failed to load Rive file: $e');
+    }
+  }
+
+  void playCorrect() {
+    _correctTrigger?.fire();
+  }
+
+  void playIncorrect() {
+    _incorrectTrigger?.fire();
+  }
+
+  void _onRiveInit(Artboard artboard) {
+    final controller = StateMachineController.fromArtboard(
+      artboard,
+      'Flag_State_Machine',
+    );
+    if (controller != null) {
+      artboard.addController(controller);
+      _correctTrigger = controller.findSMI('corrent_start');
+      _incorrectTrigger = controller.findSMI('incorrent_start');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    return _ContinuousBouncingWidget(
+      child: SizedBox(
+        width: 100,
+        height: 100,
+        child: _cachedRiveWidget ?? const SizedBox(width: 100, height: 100),
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:math' as math;
+import 'package:rive/rive.dart' hide LinearGradient;
 import '../theme/app_colors.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -11,8 +12,9 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> 
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late TabController _tabController;
+  late AnimationController _walkController;
   
   // ダミーデータ：参考画像に合わせた詳細履歴
   final List<Map<String, dynamic>> dailyHistory = [
@@ -81,6 +83,11 @@ class _HistoryScreenState extends State<HistoryScreen>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     
+    _walkController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat(reverse: true);
+    
     // 4技能タブ（インデックス2）への遷移を制限
     _tabController.addListener(() {
       if (_tabController.index == 2 && !_tabController.indexIsChanging) {
@@ -98,6 +105,7 @@ class _HistoryScreenState extends State<HistoryScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    _walkController.dispose();
     super.dispose();
   }
 
@@ -481,17 +489,67 @@ class _HistoryScreenState extends State<HistoryScreen>
                   color: AppColors.textPrimary,
                 ),
               ),
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return AnimatedBuilder(
+                      animation: _walkController,
+                      builder: (context, child) {
+                        final value = _walkController.value;
+                        final isReversing = _walkController.status == AnimationStatus.reverse;
+                        
+                        return SizedBox(
+                          height: 70,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Positioned(
+                                left: value * (constraints.maxWidth - 70),
+                                top: -20,
+                                child: SizedBox(
+                                  width: 70,
+                                  height: 70,
+                                  child: Stack(
+                                    children: [
+                                      // walk_R アニメーション（右向き）
+                                      Opacity(
+                                        opacity: isReversing ? 0.0 : 1.0,
+                                        child: const RiveAnimation.asset(
+                                          'assets/animations/pikotan_animation.riv',
+                                          animations: ['walk_R'],
+                                        ),
+                                      ),
+                                      // walk_L アニメーション（左向き）
+                                      Opacity(
+                                        opacity: isReversing ? 1.0 : 0.0,
+                                        child: const RiveAnimation.asset(
+                                          'assets/animations/pikotan_animation.riv',
+                                          animations: ['walk_L'],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
               Text(
                 '${percentage.toInt()}%',
                 style: const TextStyle(
-                  fontSize: 24,
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: AppColors.warning,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 4),
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(

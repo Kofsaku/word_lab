@@ -65,44 +65,10 @@ class _SplashScreenState extends State<SplashScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.textPrimary.withOpacity(0.2),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.school,
-                      size: 60,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  const Text(
-                    'ワードLabo',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    '英単語マスターへの道',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: AppColors.textPrimary,
-                      letterSpacing: 2,
-                    ),
+                  Image.asset(
+                    'assets/images/splash_logo.png',
+                    width: 250,
+                    fit: BoxFit.contain,
                   ),
                   const SizedBox(height: 50),
                   const CircularProgressIndicator(

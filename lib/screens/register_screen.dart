@@ -115,25 +115,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _buildHeader() {
     return Column(
       children: [
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.textPrimary.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.person_add,
-            size: 40,
-            color: AppColors.primary,
-          ),
+        Image.asset(
+          'assets/images/animations/Idle.png',
+          width: 120,
+          height: 120,
+          fit: BoxFit.contain,
         ),
         const SizedBox(height: 16),
         const Text(
