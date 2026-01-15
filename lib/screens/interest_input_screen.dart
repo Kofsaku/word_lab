@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive/rive.dart';
 import '../theme/app_colors.dart';
 
 class InterestInputScreen extends StatefulWidget {
@@ -167,18 +168,10 @@ class _InterestInputScreenState extends State<InterestInputScreen>
           Container(
             width: 100,
             height: 100,
-            decoration: BoxDecoration(
-              color: AppColors.warning.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(50),
-              border: Border.all(
-                color: AppColors.warning,
-                width: 3,
-              ),
-            ),
-            child: Icon(
-              Icons.psychology,
-              size: 60,
-              color: AppColors.warning,
+            child: RiveAnimation.asset(
+              'assets/animations/pikotan_animation.riv',
+              animations: const ['idle'],
+              fit: BoxFit.contain,
             ),
           ),
           const SizedBox(height: 16),

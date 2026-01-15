@@ -206,7 +206,7 @@ class _StageTestScreenState extends State<StageTestScreen>
       feedbackColor = isCorrect ? AppColors.correct : AppColors.incorrect;
       feedbackMessage = isCorrect ? '正解' : '不正解';
     });
-
+    
     // フィードバックアニメーションを開始（タップで次へ遷移するので自動遷移は削除）
     _feedbackController.forward();
   }
@@ -265,9 +265,6 @@ class _StageTestScreenState extends State<StageTestScreen>
         'assets/animations/pikotan_animation.riv',
         animations: const ['sleep_A'],  // 寝そべりアニメーション
         fit: BoxFit.contain,
-        onInit: (artboard) {
-          debugPrint('🎭 Stage Test Rive Animation Loaded (sleeping)');
-        },
       ),
     );
   }

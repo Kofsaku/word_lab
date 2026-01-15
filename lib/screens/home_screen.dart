@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rive/rive.dart' hide LinearGradient;
+import 'package:rive/rive.dart' hide LinearGradient, Image;
 import '../data/dummy_data.dart';
 import '../theme/app_colors.dart';
 
@@ -85,10 +85,10 @@ class _HomeScreenState extends State<HomeScreen> {
           alignment: Alignment.center,
           children: [
             SizedBox(
-              width: 80,
-              height: 80,
-              child: const RiveAnimation.asset(
-                'assets/animations/pikotan_animation.riv',
+              width: 100,
+              height: 100,
+              child: Image.asset(
+                'assets/images/animations/Sleep_A.png',
                 fit: BoxFit.contain,
               ),
             ),

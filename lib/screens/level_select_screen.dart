@@ -72,25 +72,11 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
   Widget _buildHeader() {
     return Column(
       children: [
-        Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.textPrimary.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.tune,
-            size: 50,
-            color: AppColors.primary,
-          ),
+        Image.asset(
+          'assets/images/animations/Walk.png',
+          width: 150,
+          height: 150,
+          fit: BoxFit.contain,
         ),
         const SizedBox(height: 16),
         const Text(

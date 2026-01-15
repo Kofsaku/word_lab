@@ -373,28 +373,20 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
   }
 
   Widget _buildMainContent() {
-    return Stack(
+    return Column(
       children: [
-        Column(
-          children: [
-            // 説明テキスト
-            _buildInstructionText(),
-            
-            const SizedBox(height: 20),
-            
-            // キャラクターとカードスタックの横並び表示
-            _buildCharacterAndStackRow(),
-            
-            const Spacer(flex: 2), // ここでカードを下に押し下げる
-            
-            // 例文表示（カード本体）
-            _buildExampleSection(),
-            
-            const Spacer(flex: 1), // 下部にも少し余白を設けてバランスを取る
-          ],
-        ),
+        // 説明テキスト
+        _buildInstructionText(),
         
+        const SizedBox(height: 10),
         
+        // キャラクターとカードスタック（横並び）
+        _buildCharacterAndStackRow(),
+        
+        const SizedBox(height: 20),
+        
+        // 例文表示（カード本体）
+        Expanded(child: _buildExampleSection()),
       ],
     );
   }
@@ -613,11 +605,15 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
 
   Widget _buildCharacterAndStackRow() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
+          // キャラクター（左側）
           _buildCharacterAnimation(),
+          
+          // カードスタック（右側）
           _buildCardStack(),
         ],
       ),
@@ -881,152 +877,19 @@ class _InputTrainingScreenState extends State<InputTrainingScreen>
       height: 120,
       child: RiveAnimation.asset(
         'assets/animations/pikotan_animation.riv',
-        animations: ['idle', 'walk_L', 'walk_R', 'sleep_A', 'flag_idle'],
+        // シンプルに 'idle' アニメーションのみを再生リストに指定
+        animations: const ['idle'],
         fit: BoxFit.contain,
-        onInit: (artboard) {
-          print('🎭 Rive Animation Loaded Successfully');
-          print('Current animations playing: idle, walk_L, walk_R, sleep_A, flag_idle');
-        },
+        // コントローラーによる制御を削除し、純粋なアニメーション再生のみにする
       ),
     );
   }
 
   void _analyzeAndControlRive(Artboard artboard) {
-    // Riveファイル詳細解析
-    print('=== RIVE ANIMATION ANALYSIS ===');
-    print('Artboard: ${artboard.name}');
-    print('Size: ${artboard.width} x ${artboard.height}');
-    
-    // 利用可能なアニメーション一覧
-    final animations = artboard.animations;
-    print('Available Animations (${animations.length}):');
-    int index = 0;
-    for (final animation in animations) {
-      print('  [$index] "${animation.name}"');
-      index++;
-    }
-    
-    // ステートマシン解析
-    final stateMachines = artboard.stateMachines;
-    print('Available State Machines (${stateMachines.length}):');
-    
-    StateMachineController? controller;
-    final smList = stateMachines.toList();
-    for (int i = 0; i < smList.length; i++) {
-      final sm = smList[i];
-      print('  [$i] "${sm.name}"');
-      
-      // 最初のステートマシンを使用
-      if (i == 0) {
-        try {
-          controller = StateMachineController.fromArtboard(artboard, sm.name);
-          if (controller != null) {
-            artboard.addController(controller);
-            _riveController = controller;
-            print('    -> Selected as main controller');
-          }
-        } catch (e) {
-          print('    -> Error creating controller: $e');
-        }
-      }
-      
-      // 入力パラメータ詳細
-      try {
-        final inputs = sm.inputs;
-        final inputList = inputs.toList();
-        print('    Inputs (${inputList.length}):');
-        for (int j = 0; j < inputList.length; j++) {
-          final input = inputList[j];
-          print('      [$j] "${input.name}" (${input.runtimeType})');
-        }
-      } catch (e) {
-        print('    -> Error reading inputs: $e');
-      }
-    }
-    
-    // 動的ステートマシン切り替えを開始
-    _startDynamicStateMachineSwitching();
-    
-    // Flag State Machine の制御パラメータを設定
-    _setupFlagControls();
-    
-    print('================================');
+    // シンプル再生に変更したため、複雑な解析・制御ロジックは無効化
+    print('Simple animation mode: Playing "idle"');
   }
 
-  void _setupFlagControls() {
-    Timer.periodic(const Duration(seconds: 6), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-      
-      // Flag State Machineが選択されている場合のみトリガー実行
-      if (_currentStateMachine == 'Flag_State_Machine' && _riveController != null) {
-        try {
-          final correctTrigger = _riveController!.findSMI<SMITrigger>('corrent_start');
-          final incorrectTrigger = _riveController!.findSMI<SMITrigger>('incorrent_start');
-          
-          if (correctTrigger != null || incorrectTrigger != null) {
-            final isCorrect = DateTime.now().millisecondsSinceEpoch % 2 == 0;
-            if (isCorrect && correctTrigger != null) {
-              correctTrigger.fire();
-              print('🎯 Triggered: correct flag animation');
-            } else if (!isCorrect && incorrectTrigger != null) {
-              incorrectTrigger.fire();
-              print('🚫 Triggered: incorrect flag animation');
-            }
-          }
-        } catch (e) {
-          print('Error triggering flag animation: $e');
-        }
-      }
-    });
-  }
-
-  void _startDynamicStateMachineSwitching() {
-    final stateMachines = [
-      'Idle_State_Machine',
-      'Walk_L_State_Machine',  
-      'Walk_R_State_Machine',
-      'Sleep_State_Machine',
-      'Flag_State_Machine',
-    ];
-    
-    _animationTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-      
-      // 次のステートマシンに切り替え
-      final currentIndex = stateMachines.indexOf(_currentStateMachine);
-      final nextIndex = (currentIndex + 1) % stateMachines.length;
-      final nextStateMachine = stateMachines[nextIndex];
-      
-      print('🎭 Switching from $_currentStateMachine to $nextStateMachine');
-      
-      setState(() {
-        _currentStateMachine = nextStateMachine;
-      });
-      
-      // Flag State Machine の場合、トリガーも実行
-      if (nextStateMachine == 'Flag_State_Machine') {
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted && _correctStartTrigger != null && _incorrectStartTrigger != null) {
-            // ランダムにcorrectまたはincorrectアニメーション実行
-            final isCorrect = DateTime.now().millisecondsSinceEpoch % 2 == 0;
-            if (isCorrect) {
-              _correctStartTrigger!.fire();
-              print('🎯 Triggered: correct animation');
-            } else {
-              _incorrectStartTrigger!.fire();
-              print('🚫 Triggered: incorrect animation');
-            }
-          }
-        });
-      }
-    });
-  }
 
   Widget _buildSwipeHints() {
     return Positioned(
@@ -1248,16 +1111,16 @@ class _ContinuousBouncingWidgetState extends State<_ContinuousBouncingWidget>
     );
 
     _floatAnimation = Tween<double>(
-      begin: -10.0,
-      end: 10.0,
+      begin: -4.0,
+      end: 4.0,
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOut,
     ));
 
     _scaleAnimation = Tween<double>(
-      begin: 0.95,
-      end: 1.05,
+      begin: 0.98,
+      end: 1.02,
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOut,

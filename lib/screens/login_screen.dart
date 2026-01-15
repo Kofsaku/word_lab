@@ -103,26 +103,13 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildLogo() {
     return Column(
       children: [
-        Container(
+        Image.asset(
+          'assets/images/animations/Sleep_A.png',
           width: 120,
           height: 120,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.textPrimary.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.school,
-            size: 60,
-            color: AppColors.primary,
-          ),
+          fit: BoxFit.contain,
         ),
+
         const SizedBox(height: 16),
         const Text(
           'ワードLabo',

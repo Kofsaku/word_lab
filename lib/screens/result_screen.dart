@@ -148,18 +148,9 @@ class _ResultScreenState extends State<ResultScreen>
           Container(
             width: 80,
             height: 80,
-            decoration: BoxDecoration(
-              color: AppColors.correct.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(40),
-              border: Border.all(
-                color: AppColors.correct,
-                width: 3,
-              ),
-            ),
-            child: Icon(
-              Icons.celebration,
-              size: 40,
-              color: AppColors.correct,
+            child: Image.asset(
+              'assets/images/animations/Flag.png',
+              fit: BoxFit.contain,
             ),
           ),
           const SizedBox(width: 16),
