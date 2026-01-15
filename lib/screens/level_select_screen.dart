@@ -15,14 +15,13 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
 
   // 8段階のレベル定義
   final List<Map<String, String>> _levels = [
-    {'id': 'elementary_4', 'name': '小学4年生レベル'},
     {'id': 'elementary_5', 'name': '小学5年生レベル'},
     {'id': 'elementary_6', 'name': '小学6年生レベル'},
     {'id': 'junior_1', 'name': '中学1年生レベル'},
     {'id': 'junior_2', 'name': '中学2年生レベル'},
     {'id': 'junior_3', 'name': '中学3年生レベル'},
-    {'id': 'high_1', 'name': '高校基礎レベル'},
-    {'id': 'high_2', 'name': '高校中級レベル'},
+    {'id': 'high_1', 'name': '高校基礎（検定準2級）レベル'},
+    {'id': 'high_2', 'name': '高校中級（検定2級）レベル'},
   ];
 
   bool get _canProceed => _selectedWordLevel != null && _selectedGrammarLevel != null;
@@ -275,13 +274,13 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(
-                    Icons.play_arrow,
+                    Icons.check,
                     size: 28,
                     color: AppColors.textOnPrimary,
                   ),
                   const SizedBox(width: 8),
                   const Text(
-                    '学習をスタート！',
+                    '決定してメニューに戻る',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,

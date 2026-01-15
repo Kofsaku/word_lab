@@ -240,9 +240,7 @@ class _InterestInputScreenState extends State<InterestInputScreen>
           const SizedBox(height: 12),
           Text(
             'あなたの興味・関心に基づいて、学習した単語を使った文章問題を出題します。\n\n'
-            '全12問：\n'
-            '• 前半6問：英語→日本語（4択）\n'
-            '• 後半6問：日本語→英語（4択）\n\n'
+            '全6問：日本語→英語（4択）\n\n'
             '音声再生はありません。',
             style: TextStyle(
               fontSize: 14,
@@ -306,7 +304,7 @@ class _InterestInputScreenState extends State<InterestInputScreen>
             maxLines: 4,
             maxLength: 200,
             decoration: InputDecoration(
-              hintText: '例：宇宙探索、料理、スポーツ、映画、音楽、旅行、IT技術、環境問題など...',
+              hintText: '例：宇宙探索、料理、スポーツ、映画、音楽、旅行、IT技術、環境問題、キャラクター名、有名人、映画やドラマ、アニメのタイトルなど...',
               hintStyle: TextStyle(
                 color: AppColors.textPrimary.withOpacity(0.6),
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive/rive.dart';
 import '../models/word.dart';
 import '../widgets/handwriting_input.dart';
 import '../theme/app_colors.dart';
@@ -155,9 +156,12 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
             _buildProgressBar(progress),
             Expanded(
               child: SingleChildScrollView(
+                physics: isHandwritingMode 
+                    ? const NeverScrollableScrollPhysics() 
+                    : const BouncingScrollPhysics(),
                 child: Column(
                   children: [
-                    const SizedBox(height: 20),
+                    // const SizedBox(height: 4), // Removed
                     AnimatedBuilder(
                       animation: _shakeAnimation,
                       builder: (context, child) {
@@ -167,7 +171,7 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
                         );
                       },
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 10), // 30 -> 10
                   ],
                 ),
               ),
@@ -183,25 +187,50 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
 
   Widget _buildProgressBar(double progress) {
     return Container(
-      padding: const EdgeInsets.all(20),
-      child: Column(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2), // 10 -> 2
+      child: Row(
         children: [
-          Text(
-            'もんだい ${currentIndex + 1} / ${widget.words.length}',
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+          // キャラクター
+          _buildCharacterAnimation(),
+          const SizedBox(width: 16),
+          // 進捗情報
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'もんだい ${currentIndex + 1} / ${widget.words.length}',
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 10,
+                  backgroundColor: AppColors.surface.withOpacity(0.3),
+                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 10),
-          LinearProgressIndicator(
-            value: progress,
-            minHeight: 10,
-            backgroundColor: AppColors.surface.withOpacity(0.3),
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
-          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCharacterAnimation() {
+    return _ContinuousBouncingWidget(
+      child: SizedBox(
+        width: 80,
+        height: 80,
+        child: RiveAnimation.asset(
+          'assets/animations/pikotan_animation.riv',
+          animations: const ['idle', 'walk_L', 'walk_R', 'sleep_A', 'flag_idle'],
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }
@@ -209,7 +238,7 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
   Widget _buildQuestionCard(Word word) {
     return Container(
       width: MediaQuery.of(context).size.width * 0.9,
-      padding: const EdgeInsets.all(30),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12), // all(20) -> vertical:12
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(30),
@@ -233,33 +262,33 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
               color: AppColors.accent.withOpacity(0.3),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Text(
-              word.partOfSpeech,
-              style: const TextStyle(
+            child: const Text(
+              '日本語 → 英語',
+              style: TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 16), // 30 -> 16
           Text(
             word.japanese,
             style: const TextStyle(
-              fontSize: 36,
+              fontSize: 32, // 36 -> 32
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
-            'えいごでなんていう？',
-            style: const TextStyle(
-              fontSize: 16,
-              color: AppColors.textPrimary,
+            word.partOfSpeech,
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textPrimary.withOpacity(0.6),
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 20), // 40 -> 20
           _buildInputField(word),
           if (feedbackMessage != null) ...[
             const SizedBox(height: 20),
@@ -315,8 +344,8 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
           children: List.generate(letterCount, (index) {
             final hasLetter = _controller.text.length > index;
             return Container(
-              width: 42,
-              height: 52,
+              width: 38, // 42 -> 38
+              height: 46, // 52 -> 46
               margin: const EdgeInsets.symmetric(horizontal: 3),
               decoration: BoxDecoration(
                 color: hasLetter ? AppColors.warning.withOpacity(0.6) : AppColors.surface.withOpacity(0.6),
@@ -397,7 +426,7 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
                 ),
               ),
               SizedBox(
-                height: 200,
+                height: (MediaQuery.of(context).size.height * 0.32).clamp(140.0, 350.0),
                 child: HandwritingInput(
                   onTextChanged: (text) {
                     Future.microtask(() {
@@ -602,6 +631,83 @@ class _CheckTimeScreenState extends State<CheckTimeScreen>
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ContinuousBouncingWidget extends StatefulWidget {
+  final Widget child;
+
+  const _ContinuousBouncingWidget({required this.child});
+
+  @override
+  State<_ContinuousBouncingWidget> createState() => _ContinuousBouncingWidgetState();
+}
+
+class _ContinuousBouncingWidgetState extends State<_ContinuousBouncingWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _floatAnimation;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+
+    _floatAnimation = Tween<double>(
+      begin: -8.0,
+      end: 8.0,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.95,
+      end: 1.05,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+
+    _controller.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _floatAnimation.value),
+          child: Transform.scale(
+            scale: _scaleAnimation.value,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(40),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: Offset(0, _floatAnimation.value * 0.3),
+                  ),
+                ],
+              ),
+              child: widget.child,
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -130,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildProgressCard(int completed, int total) {
-    final progress = total > 0 ? completed / total : 0.0;
+    const progress = 0.45;
     final percentage = (progress * 100).toInt();
 
     return Container(
@@ -158,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(width: 8),
               const Text(
-                'ぼうけんの進み具合(すすみぐあい)',
+                '学習の進み具合',
                 style: TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 16,
@@ -170,38 +170,36 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 15),
           Row(
             children: [
-              Text(
-                '$percentage',
-                style: const TextStyle(
-                  color: AppColors.warning,
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Text(
-                '%',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w500,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '中1レベルを学習中',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'ぜんぶで 10 ステージ',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
               ),
               const Spacer(),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    'クリア $completed',
-                    style: const TextStyle(
-                      fontSize: 18,
+                  const Text(
+                    'クリア 4',
+                    style: TextStyle(
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  Text(
-                    'ぜんぶで $total ステージ',
-                    style: const TextStyle(
-                      fontSize: 14,
                       color: AppColors.textPrimary,
                     ),
                   ),
@@ -226,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Positioned.fill(
                 child: Center(
                   child: Text(
-                    percentage >= 50 ? 'すごい！' : 'がんばれ！',
+                    '$percentage% ${percentage >= 50 ? 'すごい！' : 'がんばれ！'}',
                     style: const TextStyle(
                       color: AppColors.textOnPrimary,
                       fontSize: 12,
@@ -283,7 +281,9 @@ class _HomeScreenState extends State<HomeScreen> {
             title: 'トレーニングの続き',
             subtitle: '前回の続きから学習を開始',
             color: AppColors.accent,
-            onTap: () => Navigator.pushNamed(context, '/stage-select'),
+            // TODO: 次フェーズでライトナーロジック実装後、復習対象単語を取得して遷移する
+            // 元のコード: onTap: () => Navigator.pushNamed(context, '/stage-select'),
+            onTap: () => Navigator.pushNamed(context, '/input-training', arguments: 's1'),
             isMain: true,
           ),
           const SizedBox(height: 16),

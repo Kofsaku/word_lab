@@ -80,6 +80,19 @@ class _HistoryScreenState extends State<HistoryScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    
+    // 4技能タブ（インデックス2）への遷移を制限
+    _tabController.addListener(() {
+      if (_tabController.index == 2 && !_tabController.indexIsChanging) {
+        _tabController.index = 1; // 習得単語タブへ強制的に戻す
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('4技能分析機能は現在準備中です。'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+    });
   }
 
   @override
@@ -101,10 +114,24 @@ class _HistoryScreenState extends State<HistoryScreen>
           indicatorColor: AppColors.accent,
           labelColor: AppColors.textPrimary,
           unselectedLabelColor: AppColors.textPrimary.withOpacity(0.6),
-          tabs: const [
+          tabs: [
             Tab(text: 'BOX状況', icon: Icon(Icons.inventory, size: 20)),
-            Tab(text: '4技能', icon: Icon(Icons.bar_chart, size: 20)),
             Tab(text: '習得単語', icon: Icon(Icons.library_books, size: 20)),
+            Tab(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.bar_chart, size: 20, color: AppColors.textPrimary.withOpacity(0.2)),
+                  Text(
+                    '4技能',
+                    style: TextStyle(
+                      fontSize: 14, // 他のタブと合わせる
+                      color: AppColors.textPrimary.withOpacity(0.2),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -116,8 +143,8 @@ class _HistoryScreenState extends State<HistoryScreen>
           controller: _tabController,
           children: [
             _buildBoxStatusTab(),
-            _buildSkillsTab(),
             _buildMasteredWordsTab(),
+            _buildComingSoonTab(), // 4技能を準備中画面へ
           ],
         ),
       ),
@@ -222,16 +249,22 @@ class _HistoryScreenState extends State<HistoryScreen>
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 20), // アイコンのみ色を戻す
+              const SizedBox(width: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
           ),
+          const SizedBox(height: 4),
           Text(
             title,
             style: TextStyle(
@@ -406,9 +439,76 @@ class _HistoryScreenState extends State<HistoryScreen>
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
+          _buildOverallProgress(),
+          const SizedBox(height: 20),
           _buildBoxDistribution(),
           const SizedBox(height: 20),
           _buildBoxExplanation(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOverallProgress() {
+    // ホーム画面と共通の進捗計算（ダミー）
+    const progress = 0.45; 
+    const percentage = (progress * 100);
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                '学習の進み具合',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Text(
+                '${percentage.toInt()}%',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.warning,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 12,
+              backgroundColor: AppColors.divider,
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.warning),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '中1レベル 全10ステージ中 4ステージ完了',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textPrimary.withOpacity(0.6),
+            ),
+          ),
         ],
       ),
     );
@@ -434,7 +534,7 @@ class _HistoryScreenState extends State<HistoryScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'BOX別単語分布',
+            'BOX別単語分布（中1レベル）',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -498,18 +598,18 @@ class _HistoryScreenState extends State<HistoryScreen>
                           Row(
                             children: [
                               Text(
-                                '$count語 ($percentage%)',
-                                style: TextStyle(
+                                '$count語',
+                                style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  color: box['color'],
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                               const SizedBox(width: 8),
                               Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
-                                color: box['color'],
+                                color: AppColors.textPrimary.withOpacity(0.5),
                               ),
                             ],
                           ),
@@ -1059,6 +1159,24 @@ class _HistoryScreenState extends State<HistoryScreen>
       {'english': 'collaborate', 'japanese': '協力する', 'accuracy': 93, 'category': 'BOX5'},
       {'english': 'innovation', 'japanese': '革新', 'accuracy': 94, 'category': 'BOX4'},
       {'english': 'technology', 'japanese': '技術', 'accuracy': 87, 'category': 'BOX4'},
+      {'english': 'apple', 'japanese': 'りんご', 'accuracy': 100, 'category': 'BOX∞'},
+      {'english': 'beautiful', 'japanese': '美しい', 'accuracy': 98, 'category': 'BOX5'},
+      {'english': 'challenge', 'japanese': '挑戦', 'accuracy': 92, 'category': 'BOX4'},
+      {'english': 'development', 'japanese': '開発', 'accuracy': 95, 'category': 'BOX5'},
+      {'english': 'education', 'japanese': '教育', 'accuracy': 100, 'category': 'BOX∞'},
+      {'english': 'future', 'japanese': '未来', 'accuracy': 90, 'category': 'BOX4'},
+      {'english': 'generation', 'japanese': '世代', 'accuracy': 88, 'category': 'BOX4'},
+      {'english': 'history', 'japanese': '歴史', 'accuracy': 100, 'category': 'BOX∞'},
+      {'english': 'information', 'japanese': '情報', 'accuracy': 94, 'category': 'BOX5'},
+      {'english': 'journey', 'japanese': '旅', 'accuracy': 91, 'category': 'BOX4'},
+      {'english': 'knowledge', 'japanese': '知識', 'accuracy': 97, 'category': 'BOX5'},
+      {'english': 'language', 'japanese': '言語', 'accuracy': 100, 'category': 'BOX∞'},
+      {'english': 'mountain', 'japanese': '山', 'accuracy': 93, 'category': 'BOX4'},
+      {'english': 'negative', 'japanese': '否定的な', 'accuracy': 89, 'category': 'BOX4'},
+      {'english': 'opportunity', 'japanese': '機会', 'accuracy': 96, 'category': 'BOX5'},
+      {'english': 'practice', 'japanese': '練習', 'accuracy': 100, 'category': 'BOX∞'},
+      {'english': 'question', 'japanese': '質問', 'accuracy': 92, 'category': 'BOX4'},
+      {'english': 'responsible', 'japanese': '責任がある', 'accuracy': 94, 'category': 'BOX5'},
     ];
     
     return SingleChildScrollView(
@@ -1082,7 +1200,7 @@ class _HistoryScreenState extends State<HistoryScreen>
             child: Column(
               children: [
                 const Text(
-                  '習得した単語',
+                  '習得した単語（BOX４以上）',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -1091,22 +1209,15 @@ class _HistoryScreenState extends State<HistoryScreen>
                 ),
                 const SizedBox(height: 16),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center, // 中央寄せ
                   children: [
-                    Expanded(
+                    Container(
+                      constraints: const BoxConstraints(minWidth: 160),
                       child: _buildStatCard(
-                        'ワードプラス',
+                        '習得した単語数',
                         '${masteredWords.length}語',
                         Icons.star,
                         AppColors.warning,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildStatCard(
-                        '平均正答率',
-                        '${(masteredWords.map((w) => w['accuracy'] as int).reduce((a, b) => a + b) / masteredWords.length).round()}%',
-                        Icons.analytics,
-                        AppColors.primary,
                       ),
                     ),
                   ],
@@ -1116,89 +1227,131 @@ class _HistoryScreenState extends State<HistoryScreen>
           ),
           const SizedBox(height: 20),
           
-          // 単語リスト
-          ...masteredWords.map((word) {
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: _getAccuracyColor(word['accuracy'] as int).withOpacity(0.2),
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          word['english'] as String,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          word['japanese'] as String,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.textPrimary.withOpacity(0.7),
-                          ),
-                        ),
-                      ],
+          // 単語クラウド（タグ表示）
+          Container(
+            padding: const EdgeInsets.all(4),
+            width: double.infinity,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: masteredWords.map((word) {
+                return ActionChip(
+                  elevation: 0,
+                  pressElevation: 2,
+                  backgroundColor: AppColors.surface,
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(
+                      color: AppColors.textPrimary.withOpacity(0.2),
+                      width: 1,
                     ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.accent.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          word['category'] as String,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.accent,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: _getAccuracyColor(word['accuracy'] as int).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: _getAccuracyColor(word['accuracy'] as int),
-                            width: 1,
-                          ),
-                        ),
-                        child: Text(
-                          '${word['accuracy'] as int}%',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: _getAccuracyColor(word['accuracy'] as int),
-                          ),
-                        ),
-                      ),
-                    ],
+                  label: Text(
+                    word['english'] as String,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ],
-              ),
-            );
-          }).toList(),
+                  onPressed: () {
+                    // タップ時に詳細ダイアログを表示（オプション）
+                    _showWordDetailDialog(word);
+                  },
+                );
+              }).toList(),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildComingSoonTab() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.construction,
+            size: 80,
+            color: AppColors.textPrimary.withOpacity(0.2),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'COMING SOON',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary.withOpacity(0.3),
+              letterSpacing: 2,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '4技能分析機能は今後のアップデートで追加予定です',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textPrimary.withOpacity(0.4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showWordDetailDialog(Map<String, dynamic> word) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                word['english'] as String,
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                word['japanese'] as String,
+                style: const TextStyle(
+                  fontSize: 20,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  word['category'] as String,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.accent,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('閉じる'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
